@@ -1,4 +1,4 @@
-# ptsd-dashboard
+# impulse-dashboard
 
 ## Project setup
 ```

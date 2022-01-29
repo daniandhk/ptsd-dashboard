@@ -1,0 +1,333 @@
+<script>
+import { required, minLength, sameAs } from "vuelidate/lib/validators";
+import { notificationMethods } from "@/state/helpers";
+import * as api from '@/api';
+import Multiselect from "vue-multiselect";
+import regions from './regions.json';
+import DatePicker from "vue2-datepicker";
+
+export default {
+  components: {
+    Multiselect,
+    DatePicker,
+  },
+  data() {
+    return {
+        regions: regions,
+        cities: [],
+
+        isProvinceSelected: false,
+        submitted: false,
+        registerError: null,
+        isRegisterError: false,
+        profileData: {
+            province: "",
+            city: "",
+            datebirth: "",
+            first_name: "",
+            last_name: "",
+            phone: "",
+        },
+    };
+  },
+  validations: {
+    profileData: {
+      province: { required },
+      city: { required },
+      datebirth: { required },
+      first_name: { required },
+      last_name: { required },
+      phone: { required },
+    }
+  },
+  computed: {
+    notification() {
+      return this.$store ? this.$store.state.notification : null;
+    }
+  },
+  created() {
+    document.body.classList.add("auth-body-bg");
+  },
+  methods: {
+    ...notificationMethods,
+
+    tryToRegister(){
+        //
+    },
+
+    selectProvince(value){
+        this.profileData.city = ""
+        this.cities = value.kota
+        this.isProvinceSelected = true
+    },
+
+    removeProvince(){
+        this.profileData.city = ""
+        this.cities = []
+        this.isProvinceSelected = false
+    },
+  }
+};
+function loading() {
+  var x = document.getElementById("loading");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+</script>
+
+<template>
+  <div
+    style="background-color: #005C9A; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; overflow-x: hidden;"
+  >
+    <div
+      id="loading"
+      style="display:none; z-index:100; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+    >
+      <b-spinner
+        style="width: 3rem; height: 3rem;"
+        class="m-2"
+        variant="warning"
+        role="status"
+      />
+    </div>
+    <div
+      style="min-height: 100vh; display: flex; background-color: #005C9A;"
+    >
+      <div
+        class="card h-100 m-5"
+        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
+      >
+        <div class="card-body">
+          <div class="text-center form-group mb-0">
+            <div
+              class="mr-5 ml-5 mt-2 mb-2"
+              style="flex-direction: column;"
+            >
+              <div>
+                <div class="text-center">
+                  <div class="row justify-content-center">
+                    <img
+                      src="@/assets/logo-mini.png"
+                      height="80"
+                      alt="logo"
+                    >
+                    <div class="ml-3 mt-3 text-left">
+                      <h4
+                        class="font-size-24"
+                        style="margin-bottom:0!important; text-weight: bold;"
+                      >
+                        Selamat datang!
+                      </h4>
+                      <p
+                        class="font-size-20 mt-0"
+                        style="font-weight: normal;"
+                      >
+                        Pertama, atur profil Anda.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-2 mt-3">
+                  <b-alert
+                    v-model="isRegisterError"
+                    class="mt-3"
+                    variant="danger"
+                    dismissible
+                  >
+                    {{ registerError }}
+                  </b-alert>
+
+                  <b-alert
+                    v-if="notification.message"
+                    variant="danger"
+                    class="mt-3"
+                    show
+                    dismissible
+                  >
+                    {{ notification.message }}
+                  </b-alert>
+
+                  <form
+                    class="form-horizontal"
+                    style="min-width:260px;"
+                    @submit.prevent="tryToRegister"
+                  >
+                    <div
+                      class="row col-md-12"
+                      style="padding:0!important; margin:0!important"
+                    >
+                      <div
+                        class="form-group text-left col-md-6"
+                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                      >
+                        <label for="first_name">Nama Depan</label>
+                        <input
+                          id="first_name"
+                          v-model="profileData.first_name"
+                          type="text"
+                          class="form-control"
+                          :class="{ 'is-invalid': submitted && $v.profileData.first_name.$error }"
+                        >
+                        <div 
+                          v-if="submitted && !$v.profileData.first_name.required" 
+                          class="invalid-feedback"
+                        >
+                          Nam Depan harus diisi!
+                        </div>
+                      </div>
+
+                      <div
+                        class="form-group text-left col-md-6"
+                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                      >
+                        <label for="last_name">Nama Belakang</label>
+                        <input
+                          id="last_name"
+                          v-model="profileData.last_name"
+                          type="text"
+                          class="form-control"
+                          :class="{ 'is-invalid': submitted && $v.profileData.last_name.$error }"
+                        >
+                        <div 
+                          v-if="submitted && !$v.profileData.last_name.required" 
+                          class="invalid-feedback"
+                        >
+                          Nama Belakang harus diisi!
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      class="form-group mb-4 text-left"
+                      style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                    >
+                      <label for="phone">Tanggal Lahir</label>
+                      <date-picker
+                        v-model="profileData.datebirth"
+                        :first-day-of-week="1" 
+                        lang="en"
+                        value-type="format"
+                        :class="{ 'is-invalid': submitted && $v.profileData.datebirth.$error }"
+                      />
+                      <div
+                        v-if="submitted && !$v.profileData.datebirth.required"
+                        class="invalid-feedback"
+                      >
+                        Tanggal Lahir harus diisi!
+                      </div>
+                    </div>
+
+                    <div
+                      class="form-group mb-4 text-left"
+                      style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                    >
+                      <label for="phone">No. Telepon</label>
+                      <input
+                        id="phone"
+                        v-model="profileData.phone"
+                        type="number"
+                        class="form-control"
+                        :class="{ 'is-invalid': submitted && $v.profileData.phone.$error }"
+                      >
+                      <div 
+                        v-if="submitted && !$v.profileData.phone.required" 
+                        class="invalid-feedback"
+                      >
+                        No. Telepon harus diisi!
+                      </div>
+                    </div>
+
+                    <div
+                      class="row col-md-12"
+                      style="padding:0!important; margin:0!important"
+                    >
+                      <div
+                        class="form-group text-left col-md-6"
+                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                      >
+                        <label for="instansi">Provinsi</label>
+                        <multiselect
+                          v-model="profileData.province"
+                          :options="regions"
+                          label="provinsi"
+                          track-by="provinsi"
+                          :show-labels="false"
+                          :class="{ 'is-invalid': submitted && $v.profileData.province.$error }"
+                          @select="selectProvince"
+                          @remove="removeProvince"
+                        />
+                        <div
+                          v-if="submitted && !$v.profileData.province.required"
+                          class="invalid-feedback"
+                        >
+                          Provinsi harus dipilih!
+                        </div>
+                      </div>
+
+                      <div
+                        class="form-group text-left col-md-6"
+                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                      >
+                        <label for="instansi">Kota</label>
+                        <multiselect
+                          v-model="profileData.city"
+                          :disabled="!isProvinceSelected"
+                          :options="cities"
+                          :show-labels="false"
+                          :class="{ 'is-invalid': submitted && $v.profileData.city.$error }"
+                        />
+                        <div
+                          v-if="submitted && !$v.profileData.city.required"
+                          class="invalid-feedback"
+                        >
+                          Kota harus dipilih!
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                      <button
+                        class="btn btn-primary w-md waves-effect waves-light"
+                        style="width:100%; background-color:#005C9A;"
+                        type="submit"
+                      >
+                        Simpan
+                      </button>
+                    </div>
+                  </form>
+                  <div class="m-3 text-center">
+                    <p>Atau</p>
+                  </div>
+                  <div class="mb-4 text-center">
+                    <button
+                      class="btn btn-danger w-md waves-effect waves-light"
+                      style="width:100%;"
+                      @click="onOrButtonClick()"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                </div>
+
+                <!-- <div class="mt-5 text-center">
+                        <a
+                          href="/about-us"
+                          style="text-decoration: none; color: inherit;"
+                        >
+                          <p>
+                            © 2021 Informatics Lab.
+                          </p>
+                        </a>
+                      </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

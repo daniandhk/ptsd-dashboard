@@ -1,0 +1,64 @@
+{
+    "trauma":{
+        "type":"trauma",
+        "title":"Skrining Trauma",
+        "questions":[
+            "Pernahkah Anda mengalami, menyaksikan, atau dihadapkan berulang kali pada hal berikut ini:",
+            "Jika Anda menandai salah satu item sebelumnya, pengalaman traumatis mana yang ada di pikiran Anda dan saat ini sangat mengganggu Anda?"
+        ],
+        "answers":[
+            "Penyakit serius yang mengancam nyawa (serangan jantung, dll)",
+            "Kekerasan fisik (diserang dengan senjata, luka parah akibat perkelahian, ditodongan senjata, dll)",
+            "Kekerasan seksual (korban pemerkosaan, korban percobaan pemerkosaan, dll)",
+            "Pertempuran militer atau tinggal di zona perang ",
+            "Kekerasan pada anak (dipukul berat, tindakan seksual dengan seseorang 5 tahun lebih tua, dll)",
+            "Kecelakaan (luka serius atau kematian di kecelakaan mobil, saat bekerja, kebakaran rumah, dll)",
+            "Bencana alam (badai parah, banjir, gempa bumi, dll)"
+        ]
+    },
+    "diagnosa":{
+        "type":"diagnosa",
+        "title":[
+            "Skala Diagnostik PTSD untuk DSM-5 (PDS-5)",
+            "Gangguan dan Interferensi"
+        ],
+        "questions":[
+            [
+                "Kenangan menjengkelkan yang tidak diinginkan tentang trauma",
+                "Mimpi buruk atau mengerikan yang berhubungan dengan trauma",
+                "Mengenang kembali peristiwa atau perasaan traumatis seolah-olah kenangan itu benar-benar terjadi lagi",
+                "Merasa sangat kesal secara EMOSIONAL ketika diingatkan akan traumanya",
+                "Memiliki reaksi FISIK saat mengingat trauma (misalnya berkeringat, jantung berdebar kencang, dll)",
+                "Mencoba menghindari pikiran atau perasaan yang berhubungan dengan trauma",
+                "Berusaha menghindari aktivitas, situasi, atau tempat yang mengingatkan Anda akan trauma atau yang terasa lebih berbahaya sejak trauma itu terjadi",
+                "Tidak dapat mengingat bagian penting dari trauma",
+                "Melihat diri sendiri, orang lain, atau dunia dengan cara yang lebih negatif (misalnya \"Saya tidak bisa mempercayai orang\", \"Saya orang yang lemah\")",
+                "Menyalahkan diri sendiri atau orang lain (selain orang yang menyakiti Anda) atas apa yang telah terjadi"
+            ],
+            [
+                "Memiliki perasaan negatif yang intens seperti takut, ngeri, marah, bersalah, atau malu",
+                "Kehilangan minat atau tidak berpartisipasi dalam aktivitas yang biasa Anda lakukan",
+                "Merasa jauh atau terputus hubungannya dari orang lain",
+                "Mengalami kesulitan mengalami perasaan positif",
+                "Bertindak lebih mudah tersinggung atau agresif dengan orang lain",
+                "Melakukan lebih banyak hal yang berisiko atau melakukan hal-hal yang dapat membahayakan Anda atau orang lain (misalnya mengemudi dengan sembrono, menggunakan narkoba, berhubungan seks tanpa pengaman)",
+                "Menjadi terlalu waspada atau berjaga-jaga (misalnya memeriksa siapa yang ada di sekitar Anda, merasa tidak nyaman dengan membelakangi pintu)",
+                "Menjadi gelisah atau lebih mudah terkejut (misalnya ketika seseorang berjalan di belakang Anda)",
+                "Mengalami kesulitan berkonsentrasi",
+                "Mengalami kesulitan tidur atau tetap tertidur"
+            ],
+            [
+                "Seberapa besar kesulitan-kesulitan tadi mengganggu Anda?",
+                "Telah seberapa besar kesulitan-kesulitan tadi mengganggu kehidupan sehari-hari Anda (misalnya hubungan, pekerjaan, atau kegiatan penting lainnya)?"
+            ]
+        ]
+    },
+    "symptom":{
+        "type":"symptom",
+        "title":"Awal Mula Gejala dan Durasinya",
+        "questions":[
+            "Berapa lama setelah trauma, kesulitan-kesulitan tadi dimulai?",
+            "Berapa lama Anda mengalami kesulitan-kesulitan terkait trauma tadi?"
+        ]
+    }
+}
