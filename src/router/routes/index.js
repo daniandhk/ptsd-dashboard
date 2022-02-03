@@ -1,4 +1,4 @@
-import store from '@/store'
+import store from '@/store';
 import * as api from '@/api';
 
 import etcRoutes from "./etc.js";

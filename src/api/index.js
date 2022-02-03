@@ -14,7 +14,7 @@ export function login(data){
 }
 export function validateUser(){
     return httpAxios({
-        url: '/me',
+        url: '/auth/me',
         method: 'GET',
         // headers: {
         //     Authorization: 'Bearer ' + store.getters.getLoggedUser.token,

@@ -81,7 +81,7 @@ export default {
               this.isAuthError = false;
               this.loginSuccess = true;
 
-              this.$store.commit('LOGGED_USER', response.data.data);
+              this.$store.commit('LOGGED_USER', response.data);
               loading();
               // Redirect to the originally requested page, or to the home page
               this.$router.push(
