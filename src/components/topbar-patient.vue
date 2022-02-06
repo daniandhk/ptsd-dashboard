@@ -8,12 +8,7 @@ export default {
   data() {
     return {
       current_language: "en",
-      // getRole: store.getters.getRoleUser,
-      // user: store.getters.getLoggedUser
-      user: {
-        first_name: "First",
-        last_name: "Last"
-      }
+      user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
     };
   },
   methods: {
@@ -126,13 +121,13 @@ export default {
             <span
               class="d-none d-xl-inline-block ml-2 mr-2"
               style="font-size:16px"
-            >halo, {{ user.first_name }}</span>
+            >halo, {{ user.profile ? user.profile.first_name : user.email }}</span>
             <i class="mdi mdi-chevron-down d-none d-xl-inline-block" />
           </template>
           <!-- item-->
           <a class="dropdown-item">
             <i class="ri-user-line align-middle mr-1" />
-            {{ user.first_name + " " + user.last_name }}
+            {{ user.email }}
           </a>
           <a
             class="dropdown-item d-block"

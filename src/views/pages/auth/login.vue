@@ -19,19 +19,10 @@ export default {
       isAuthError: false,
       loginSuccess: false,
       tokenExpired: this.$route.params.tokenExpired,
-
-      isRegister: false,
-      submitted_reg: false,
-      registerError: null,
-      isRegisterError: false,
-      registerData: {
-        institute: "",
-				email: "",
-        password: "",
-        password_confirmation: "",
-			},
+      registerSuccess: this.$route.params.registerSuccess,
 
       email:"mailto:daniandhika03@gmail.com",
+      forgot_password:"",
 
       dropdownInstitute: ["Universitas Telkom", "Lainnya"]
     };
@@ -49,12 +40,6 @@ export default {
       email: { required },
       password: { required },
     },
-    registerData: {
-      institute: { required },
-      email: { required },
-      password: { required, minLength: minLength(6) },
-      password_confirmation: { required, sameAsPassword: sameAs("new_password") },
-    }
   },
   methods: {
     ...notificationMethods,
@@ -91,7 +76,7 @@ export default {
             .catch(error => {
               loading();
               this.tryingToLogIn = false;
-              this.authError = error.response ? error.response.data.message : error;
+              this.authError = error.response.data.error;
               this.isAuthError = true;
             })
         );
@@ -102,42 +87,6 @@ export default {
       this.$router.push({
           name: 'register'
       });
-    },
-
-    tryToRegister() {
-      loading();
-      this.submitted_reg = true;
-      // stop here if form is invalid
-      this.$v.registerData.$touch();
-
-      if (this.$v.registerData.$invalid) {
-        loading();
-        return;
-      } else {
-        this.registerError = null;
-        // return (
-        //   api.login(this.loginData)
-        //     // eslint-disable-next-line no-unused-vars
-        //     .then(response => {
-        //       this.tryingToLogIn = false;
-        //       this.isAuthError = false;
-        //       this.loginSuccess = true;
-
-        //       this.$store.commit('LOGGED_USER', response.data.data);
-        //       loading();
-        //       // Redirect to the originally requested page, or to the home page
-        //       this.$router.push(
-        //         this.$route.query.redirectFrom || { name: "home" }
-        //       );
-        //     })
-        //     .catch(error => {
-        //       loading();
-        //       this.tryingToLogIn = false;
-        //       this.authError = error.response ? error.response.data.message : error;
-        //       this.isAuthError = true;
-        //     })
-        // );
-      }
     },
   }
 };
@@ -199,6 +148,15 @@ function loading() {
                       </div>
 
                       <div class="p-2 mt-5">
+                        <b-alert
+                          v-model="registerSuccess"
+                          class="mt-3"
+                          variant="success"
+                          dismissible
+                        >
+                          Registrasi Anda berhasil!<br>Silahkan Login untuk melanjutkan.
+                        </b-alert>
+
                         <b-alert
                           v-model="tokenExpired"
                           class="mt-3"
@@ -322,6 +280,13 @@ function loading() {
                       >
                         <p>
                           <a
+                            :href="forgot_password"
+                            class="font-weight-medium text-primary"
+                          >
+                            Lupa Password
+                          </a>
+                          |
+                          <a
                             :href="email"
                             class="font-weight-medium text-primary"
                           >
@@ -421,7 +386,7 @@ function loading() {
                         <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
                           <i
                             style="font-size:80px;color:#005C9A;"
-                            class=" ri-heart-add-line"
+                            class="mdi mdi-calendar-heart"
                           />
                           <p
                             style="color:#005C9A; font-size:18px; text-align:center; font-weight: bold;"

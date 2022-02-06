@@ -3,8 +3,9 @@ import { notificationMethods } from "@/state/helpers";
 import * as api from '@/api';
 import { required } from "vuelidate/lib/validators";
 import Swal from "sweetalert2";
-import tests from "./data-test";
-import texts from "./data-text";
+import tests from "@/views/pages/pds5/data-test";
+import texts from "@/views/pages/pds5/data-text";
+import store from '@/store';
 
 export default {
   components: {
@@ -12,7 +13,7 @@ export default {
   },
   data() {
     return {
-        patient_id: 1,
+        patient_id: store.getters.getLoggedUser.profile.id,
         pageNumber: 1,
         testData: tests,
         textData: texts,

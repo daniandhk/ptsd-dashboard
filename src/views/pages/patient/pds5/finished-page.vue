@@ -117,7 +117,7 @@ function loading() {
                     >
                       <button
                         class="btn btn-primary w-md waves-effect waves-light m-1"
-                        style="background-color:#005C9A;"
+                        style="background-color:#005C9A; min-width:100%;"
                         @click="onStartButtonClick()"
                       >
                         Selesai

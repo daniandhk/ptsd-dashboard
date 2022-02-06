@@ -36,7 +36,7 @@ export default {
       institute: { required },
       email: { required },
       password: { required, minLength: minLength(6) },
-      password_confirmation: { required, sameAsPassword: sameAs("new_password") },
+      password_confirmation: { required, sameAsPassword: sameAs("password") },
     }
   },
   methods: {
@@ -59,28 +59,20 @@ export default {
         return;
       } else {
         this.registerError = null;
-        // return (
-        //   api.login(this.loginData)
-        //     // eslint-disable-next-line no-unused-vars
-        //     .then(response => {
-        //       this.tryingToLogIn = false;
-        //       this.isAuthError = false;
-        //       this.loginSuccess = true;
-
-        //       this.$store.commit('LOGGED_USER', response.data.data);
-        //       loading();
-        //       // Redirect to the originally requested page, or to the home page
-        //       this.$router.push(
-        //         this.$route.query.redirectFrom || { name: "home" }
-        //       );
-        //     })
-        //     .catch(error => {
-        //       loading();
-        //       this.tryingToLogIn = false;
-        //       this.authError = error.response ? error.response.data.message : error;
-        //       this.isAuthError = true;
-        //     })
-        // );
+        delete this.registerData.password_confirmation;
+        return (
+          api.register(this.registerData)
+            // eslint-disable-next-line no-unused-vars
+            .then(response => {
+              loading();
+              this.$router.push({ name: 'login', params: { registerSuccess: true } });
+            })
+            .catch(error => {
+              loading();
+              this.registerError = error.response ? error.response.data.message : error;
+              this.isRegisterError = true;
+            })
+        );
       }
     },
   }
@@ -134,9 +126,9 @@ function loading() {
                           </a>
                         </div>
 
-                        <!-- <h4 class="font-size-18 mt-4">
+                        <h4 class="font-size-18 mt-3">
                           Registrasi
-                        </h4> -->
+                        </h4>
                       </div>
 
                       <div class="p-2 mt-3">
@@ -255,7 +247,7 @@ function loading() {
                         <div class="m-3 text-center">
                           <p>Atau</p>
                         </div>
-                        <div class="mb-4 text-center">
+                        <div class="mb-2 text-center">
                           <button
                             class="btn btn-primary w-md waves-effect waves-light"
                             style="width:100%; background-color:#005C9A;"
@@ -368,7 +360,7 @@ function loading() {
                         <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
                           <i
                             style="font-size:80px;color:#005C9A;"
-                            class=" ri-heart-add-line"
+                            class="mdi mdi-calendar-heart"
                           />
                           <p
                             style="color:#005C9A; font-size:18px; text-align:center; font-weight: bold;"

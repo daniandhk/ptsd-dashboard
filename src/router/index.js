@@ -32,48 +32,47 @@ const router = new VueRouter({
 
 
 router.beforeEach((routeTo, routeFrom, next) => {
-    // const authRequired = routeTo.matched.some((route) => route.meta.authRequired)
-    // if (!authRequired) return next()
+    const authRequired = routeTo.matched.some((route) => route.meta.authRequired)
+    if (!authRequired) return next()
 
-    // let loggedUser = store.getters.getLoggedUser
-    // if (loggedUser){
-    //   return api.validateUser().then(response => {
-    //     // console.log(response.data.data)
-    //     response.data.data.token = store.getters.getLoggedUser.token
-    //     store.commit('LOGGED_USER', response.data.data)
+    let loggedUser = store.getters.getLoggedUser
+    if (loggedUser){
+      return api.validateUser().then(response => {
+        // console.log(response.data.data)
+        response.data.token = store.getters.getLoggedUser.token
+        store.commit('LOGGED_USER', response.data)
         
-    //     let role = store.getters.getRoleUser
-    //     if (!role) {
-    //         store.commit('ROLE_USER', response.data.data.roles[0])
-    //     }
-    //     next()
-    //   })
-    //   .catch(error => {
-    //     store.dispatch('logOut')
-    //     //console.log(error)
-    //     redirectToLogin("expired")
-    //   })
-    // }
+        let role = store.getters.getRoleUser
+        if (!role) {
+            store.commit('ROLE_USER', response.data.roles[0].name)
+        }
+        next()
+      })
+      .catch(error => {
+        store.dispatch('logOut')
+        //console.log(error)
+        redirectToLogin("expired")
+      })
+    }
 
-    // // If auth is required and the user is NOT currently logged in,
-    // // redirect to login.
-    // redirectToLogin()
+    // If auth is required and the user is NOT currently logged in,
+    // redirect to login.
+    redirectToLogin()
 
-    // // eslint-disable-next-line no-unused-vars
-    // // eslint-disable-next-line no-inner-declarations
-    // function redirectToLogin(status) {
-    //   // Pass the original route to the login component
-    //   //next({ name: 'login', query: { redirectFrom: routeTo.fullPath } })
+    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-inner-declarations
+    function redirectToLogin(status) {
+      // Pass the original route to the login component
+      //next({ name: 'login', query: { redirectFrom: routeTo.fullPath } })
 
-    //   switch(status) {
-    //     case "expired":
-    //       next({ name: 'login', params: { tokenExpired: true } })
-    //       break;
-    //     default:
-    //       next({ name: 'login' })
-    //   }
-    // }
-    return next()
+      switch(status) {
+        case "expired":
+          next({ name: 'login', params: { tokenExpired: true } })
+          break;
+        default:
+          next({ name: 'login' })
+      }
+    }
 })
 
 router.beforeResolve(async (routeTo, routeFrom, next) => {

@@ -12,7 +12,7 @@ const baseRoutes = [
         meta: {
             authRequired: true,
         },
-        component: () => import('../../views/pages/patient/dashboard')
+        component: () => import('../../views/pages/dashboard')
     },
 ]
 

@@ -23,23 +23,42 @@ export function validateUser(){
 }
 export function register(data){
     return httpAxios({
-        url: '/register',
+        url: '/auth/register',
         method: 'POST',
         data: data
     })
 }
 
-export function changePassword(data){
+// export function changePassword(data){
+//     return httpAxios({
+//         url: `/me/update-password`,
+//         method: 'PUT',
+//         data: data
+//     })
+// }
+
+export function logout(){
     return httpAxios({
-        url: `/me/update-password`,
-        method: 'PUT',
+        url: `/auth/logout`,
+        method: 'POST',
+    })
+}
+
+export function resend(){
+    return httpAxios({
+        url: `/auth/email/resend`,
+        method: 'GET',
+    })
+}
+
+export function createRelation(data){
+    return httpAxios({
+        url: '/relation/create',
+        method: 'POST',
         data: data
     })
 }
 
-export function logout(user_id){
-    return httpAxios({
-        url: `/auth/logout/${user_id}`,
-        method: 'POST',
-    })
+export function showTest(test_id){
+    return httpAxios.get(`/test/show/${test_id}`);
 }

@@ -375,7 +375,7 @@ function loading() {
                         <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
                           <i
                             style="font-size:80px;color:#005C9A;"
-                            class=" ri-heart-add-line"
+                            class=" mdi mdi-calendar-heart"
                           />
                           <p
                             style="color:#005C9A; font-size:18px; text-align:center; font-weight: bold;"

@@ -5,6 +5,7 @@ import * as api from '@/api';
 import Multiselect from "vue-multiselect";
 import regions from './regions.json';
 import DatePicker from "vue2-datepicker";
+import store from '@/store';
 
 export default {
   components: {
@@ -13,21 +14,22 @@ export default {
   },
   data() {
     return {
-        regions: regions,
-        cities: [],
+      user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
+      regions: regions,
+      cities: [],
 
-        isProvinceSelected: false,
-        submitted: false,
-        registerError: null,
-        isRegisterError: false,
-        profileData: {
-            province: "",
-            city: "",
-            datebirth: "",
-            first_name: "",
-            last_name: "",
-            phone: "",
-        },
+      isProvinceSelected: false,
+      submitted: false,
+      registerError: null,
+      isRegisterError: false,
+      profileData: {
+          province: "",
+          city: "",
+          datebirth: "",
+          first_name: "",
+          last_name: "",
+          // phone: "",
+      },
     };
   },
   validations: {
@@ -37,7 +39,7 @@ export default {
       datebirth: { required },
       first_name: { required },
       last_name: { required },
-      phone: { required },
+      // phone: { required },
     }
   },
   computed: {
@@ -52,7 +54,34 @@ export default {
     ...notificationMethods,
 
     tryToRegister(){
-        //
+      loading();
+      this.submitted = true;
+      // stop here if form is invalid
+      this.$v.profileData.$touch();
+
+      if (this.$v.profileData.$invalid) {
+        loading();
+        return;
+      } else {
+        this.registerError = null;
+        this.profileData.user_id = this.user.id;
+        this.profileData.province = this.profileData.province.provinsi;
+        this.profileData.have_relation = false;
+        // console.log(this.profileData)
+        return (
+          api.inputProfilePatient(this.profileData)
+            // eslint-disable-next-line no-unused-vars
+            .then(response => {
+              loading();
+              window.location.reload();
+            })
+            .catch(error => {
+              loading();
+              this.registerError = error.response ? error.response.data.message : error;
+              this.isRegisterError = true;
+            })
+        );
+      }
     },
 
     selectProvince(value){
@@ -80,7 +109,8 @@ function loading() {
 
 <template>
   <div
-    style="background-color: #005C9A; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; overflow-x: hidden;"
+    class="mt-5"
+    style="display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; overflow-x: hidden;"
   >
     <div
       id="loading"
@@ -94,7 +124,7 @@ function loading() {
       />
     </div>
     <div
-      style="min-height: 100vh; display: flex; background-color: #005C9A;"
+      style="min-height: 100vh; display: flex;"
     >
       <div
         class="card h-100 m-5"
@@ -221,7 +251,7 @@ function loading() {
                       </div>
                     </div>
 
-                    <div
+                    <!-- <div
                       class="form-group mb-4 text-left"
                       style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
                     >
@@ -239,7 +269,7 @@ function loading() {
                       >
                         No. Telepon harus diisi!
                       </div>
-                    </div>
+                    </div> -->
 
                     <div
                       class="row col-md-12"
@@ -299,7 +329,7 @@ function loading() {
                       </button>
                     </div>
                   </form>
-                  <div class="m-3 text-center">
+                  <!-- <div class="m-3 text-center">
                     <p>Atau</p>
                   </div>
                   <div class="mb-4 text-center">
@@ -310,7 +340,7 @@ function loading() {
                     >
                       Log Out
                     </button>
-                  </div>
+                  </div> -->
                 </div>
 
                 <!-- <div class="mt-5 text-center">

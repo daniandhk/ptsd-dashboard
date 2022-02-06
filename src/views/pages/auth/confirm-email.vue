@@ -8,7 +8,9 @@ export default {
   },
   data() {
     return {
-        //
+        isResendSuccess: false,
+        isConfirmFailed: false,
+        isResendDisabled: false,
     };
   },
   computed: {
@@ -22,7 +24,46 @@ export default {
   methods: {
     ...notificationMethods,
 
-    //
+    onLogoutButtonClick(){
+      this.$router.push({name: 'logout'});
+    },
+
+    onConfirmButtonClick(){
+      loading();
+      api.validateUser()
+            // eslint-disable-next-line no-unused-vars
+        .then(response => {
+          if(response.data){
+            if(response.data.email_verified_at != null){
+              this.isConfirmFailed = false;
+              window.location.reload();
+            }
+            else{
+              this.isConfirmFailed = true;
+            }
+          }
+          loading();
+        })
+        .catch(error => {
+          loading();
+          console.log(error)
+        })
+    },
+
+    onResendButtonClick(){
+      loading();
+      api.resend()
+            // eslint-disable-next-line no-unused-vars
+        .then(response => {
+          loading();
+          this.isResendSuccess = true;
+          this.isResendDisabled = true;
+        })
+        .catch(error => {
+          loading();
+          console.log(error)
+        })
+    }
   }
 };
 function loading() {
@@ -37,7 +78,8 @@ function loading() {
 
 <template>
   <div
-    style="background-color: #005C9A; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; overflow-x: hidden;"
+    class="mt-5"
+    style="display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; overflow-x: hidden;"
   >
     <div
       id="loading"
@@ -51,7 +93,7 @@ function loading() {
       />
     </div>
     <div
-      style="min-height: 100vh; display: flex; background-color: #005C9A;"
+      style="min-height: 100%; display: flex;"
     >
       <div
         class="card h-100 m-5"
@@ -60,7 +102,7 @@ function loading() {
         <div class="card-body">
           <div class="text-center form-group mb-0">
             <div
-              class="mr-5 ml-5 mt-2 mb-2 pr-5 pl-5"
+              class="mr-5 ml-5 mt-2 mb-3"
               style="flex-direction: column;"
             >
               <p
@@ -71,34 +113,57 @@ function loading() {
               <p
                 style="font-size:16px; text-align:center; margin-top:0!important"
               >
-                Terima kasih telah mendaftarkan akun! Harap cek email Anda untuk verifikasi.
+                Terima kasih telah mendaftarkan akun! Silahkan cek email Anda untuk verifikasi.
               </p>
+
+              <b-alert
+                v-model="isResendSuccess"
+                class="mt-3"
+                variant="success"
+              >
+                Verifikasi telah dikirim kembali ke email Anda!
+              </b-alert>
+
+              <b-alert
+                v-if="isConfirmFailed"
+                variant="danger"
+                class="mt-3"
+                show
+                dismissible
+              >
+                Email belum diverifikasi! Harap cek kembali email Anda.
+              </b-alert>
+
               <div class="mt-2">
                 <button 
                   type="button"
                   class="btn btn-secondary m-1" 
-                  style="min-width: 200px;" 
+                  style="min-width: 250px;"
+                  :disabled="isResendDisabled"
+                  @click="onResendButtonClick()"
                 >
                   Kirim Ulang Email
                 </button>
                 <button 
                   type="button"
                   class="btn btn-primary m-1" 
-                  style="min-width: 200px; background-color:#005C9A;" 
+                  style="min-width: 250px; background-color:#005C9A;"
+                  @click="onConfirmButtonClick()"
                 >
                   Konfirmasi
                 </button>
               </div>
-              <div class="mt-3 text-center">
+              <!-- <div class="mt-3 text-center">
                 <p>Atau</p>
               </div>
               <button 
                 type="button"
                 class="btn btn-danger m-1" 
-                style="min-width: 150px;" 
+                style="min-width: 250px;"
+                @click="onLogoutButtonClick()"
               >
                 Log Out
-              </button>
+              </button> -->
             </div>
           </div>
         </div>
