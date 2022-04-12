@@ -275,6 +275,65 @@ function loading() {
       />
     </div>
 
+    <!-- <b-tabs
+      nav-class="nav-tabs-custom"
+      class="mt-5"
+      style="display: flex; align-items: center; justify-content: center;"
+      @input="refreshData"
+    >
+      <b-tab title-link-class="p-3" title-item-class="flex-fill">
+        <template v-slot:title>
+          <div class="text-center">
+            <i
+              style="font-size:30px; color:#005C9A;"
+              class="mdi mdi-file-document-edit-outline"
+            />
+            <p
+              class="text-center font-size-12 text-uppercase font-weight-bold"
+              style="color:#005C9A;"
+            >
+              Tes Penilaian Diri PTSD
+            </p>
+          </div>
+        </template>
+        //
+      </b-tab>
+      <b-tab title-link-class="p-3" title-item-class="flex-fill">
+        <template v-slot:title>
+          <div class="text-center">
+            <i
+              style="font-size:30px; color:#005C9A;"
+              class="mdi mdi-file-document-edit-outline"
+            />
+            <p
+              class="text-center font-size-12 text-uppercase font-weight-bold"
+              style="color:#005C9A;"
+            >
+              Tes Penilaian Diri PTSD
+            </p>
+          </div>
+        </template>
+        //
+      </b-tab>
+      <b-tab title-link-class="p-3" title-item-class="flex-fill">
+        <template v-slot:title>
+          <div class="text-center">
+            <i
+              style="font-size:30px; color:#005C9A;"
+              class="mdi mdi-file-document-edit-outline"
+            />
+            <p
+              class="text-center font-size-12 text-uppercase font-weight-bold"
+              style="color:#005C9A;"
+            >
+              Tes Penilaian Diri PTSD
+            </p>
+          </div>
+        </template>
+        //
+      </b-tab>
+    </b-tabs> -->
+
     <div class="m-5">
       <div class="row">
         <!-- 1 -->
