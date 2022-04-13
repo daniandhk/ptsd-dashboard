@@ -43,7 +43,7 @@ export default {
           this.viewEmail = true
           this.viewProfile = false
         }
-        else if(this.user.is_profile_set == false){
+        else if(this.user.profile == null){
           this.viewEmail = false
           this.viewProfile = true
         }

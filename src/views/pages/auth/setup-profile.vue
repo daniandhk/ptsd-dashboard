@@ -17,6 +17,7 @@ export default {
       user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
       regions: regions,
       cities: [],
+      data_province: "",
 
       isProvinceSelected: false,
       submitted: false,
@@ -30,6 +31,7 @@ export default {
           last_name: "",
           // phone: "",
       },
+      
     };
   },
   validations: {
@@ -56,6 +58,7 @@ export default {
     tryToRegister(){
       loading();
       this.submitted = true;
+      this.profileData.province = this.data_province.provinsi;
       // stop here if form is invalid
       this.$v.profileData.$touch();
 
@@ -65,7 +68,6 @@ export default {
       } else {
         this.registerError = null;
         this.profileData.user_id = this.user.id;
-        this.profileData.province = this.profileData.province.provinsi;
         this.profileData.have_relation = false;
         return (
           api.inputProfilePatient(this.profileData)
@@ -280,7 +282,7 @@ function loading() {
                       >
                         <label for="instansi">Provinsi</label>
                         <multiselect
-                          v-model="profileData.province"
+                          v-model="data_province"
                           :options="regions"
                           label="provinsi"
                           track-by="provinsi"
