@@ -62,7 +62,6 @@ export default {
             })
             .catch(error => {
               loading();
-              console.log(error);
             })
         );
     },
@@ -190,7 +189,7 @@ export default {
                   window.open("http://help-ptsd-chat.herokuapp.com/");
               })
               .catch(error => {
-                console.log(error);
+                //
               })
           }
       });

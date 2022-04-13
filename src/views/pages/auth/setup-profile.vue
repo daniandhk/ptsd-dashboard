@@ -67,7 +67,6 @@ export default {
         this.profileData.user_id = this.user.id;
         this.profileData.province = this.profileData.province.provinsi;
         this.profileData.have_relation = false;
-        // console.log(this.profileData)
         return (
           api.inputProfilePatient(this.profileData)
             // eslint-disable-next-line no-unused-vars
@@ -124,7 +123,7 @@ function loading() {
       />
     </div>
     <div
-      style="min-height: 100vh; display: flex;"
+      style="min-height: 100%; display: flex;"
     >
       <div
         class="card h-100 m-5"
@@ -147,7 +146,7 @@ function loading() {
                     <div class="ml-3 mt-3 text-left">
                       <h4
                         class="font-size-24"
-                        style="margin-bottom:0!important; text-weight: bold;"
+                        style="margin-bottom:0!important; text-weight: bold; color:#005C9A;"
                       >
                         Selamat datang!
                       </h4>

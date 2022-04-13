@@ -2,6 +2,7 @@
 import axios from 'axios'
 import store from './store'
 import Vue from 'vue'
+import Cookies from 'js-cookie'
 
 // Create
 const service = axios.create({
@@ -10,7 +11,7 @@ const service = axios.create({
 
 // Token
 if (store.getters.getLoggedUser) {
-    service.defaults.headers.common['Authorization'] = 'Bearer ' + store.getters.getLoggedUser.token
+    service.defaults.headers.common['Authorization'] = 'Bearer ' + store.getters.getLoggedUser.access_token
 }
 
 // Request Interceptor
@@ -19,7 +20,19 @@ service.interceptors.request.use(config => {
 
     // Set Token
     if (store.getters.getLoggedUser) {
-        config.headers["Authorization"] = 'Bearer ' + store.getters.getLoggedUser.token;
+        config.headers["Authorization"] = 'Bearer ' + store.getters.getLoggedUser.access_token;
+    }
+
+    // Set Cookie
+    if ((
+            config.method == 'post' || 
+            config.method == 'put' || 
+            config.method == 'delete'
+            /* other methods you want to add here */
+        ) &&
+        !Cookies.get('XSRF-TOKEN')) {
+        return setCSRFToken()
+            .then(response => config);
     }
 
     return config
@@ -28,6 +41,11 @@ service.interceptors.request.use(config => {
 
     return Promise.reject(error)
 })
+
+// Get Cookie
+const setCSRFToken = () => {
+    return service.get('http://localhost:8000/sanctum/csrf-cookie'); // resolves to '/api/csrf-cookie'.
+}
 
 // Response Interceptor
 service.interceptors.response.use(response => {

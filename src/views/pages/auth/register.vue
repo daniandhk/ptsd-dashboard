@@ -14,13 +14,14 @@ export default {
       registerError: null,
       isRegisterError: false,
       registerData: {
-        institute: "",
+        role: "psychologist",
 				email: "",
         password: "",
         password_confirmation: "",
 			},
 
-      dropdownInstitute: ["Universitas Telkom", "Lainnya"]
+      role_data: {name: "Psikolog / Staff", role: "psychologist"},
+      dropdownRole: [{name: "Psikolog / Staff", role: "psychologist"}, {name: "Pasien", role: "patient"}]
     };
   },
   computed: {
@@ -29,11 +30,12 @@ export default {
     }
   },
   created() {
+    this.checkToken();
     document.body.classList.add("auth-body-bg");
   },
   validations: {
     registerData: {
-      institute: { required },
+      role: { required },
       email: { required },
       password: { required, minLength: minLength(6) },
       password_confirmation: { required, sameAsPassword: sameAs("password") },
@@ -46,6 +48,14 @@ export default {
       this.$router.push({
           name: 'login'
       });
+    },
+
+    setRole(value){
+      this.registerData.role = value.role
+    },
+
+    checkToken(){
+      let token = this.$route.params.token;
     },
 
     tryToRegister() {
@@ -126,9 +136,12 @@ function loading() {
                           </a>
                         </div>
 
-                        <h4 class="font-size-18 mt-3">
-                          Registrasi
+                        <h4 class="font-size-18 mt-4">
+                          Registrasi {{ role_data.name }}
                         </h4>
+                        <p class="text-muted">
+                          Kelola gangguan PTSD Anda bersama kami
+                        </p>
                       </div>
 
                       <div class="p-2 mt-3">
@@ -156,18 +169,22 @@ function loading() {
                           @submit.prevent="tryToRegister"
                         >
                           <div class="form-group mb-4">
-                            <label for="instansi">Instansi</label>
+                            <label for="akun">Akun</label>
                             <multiselect
-                              v-model="registerData.institute"
-                              :options="dropdownInstitute"
+                              v-model="role_data"
+                              :options="dropdownRole"
                               :show-labels="false"
-                              :class="{ 'is-invalid': submitted_reg && $v.registerData.institute.$error }"
+                              :allow-empty="false"
+                              label="name"
+                              track-by="role"
+                              :class="{ 'is-invalid': submitted_reg && $v.registerData.role.$error }"
+                              @select="setRole"
                             />
                             <div
-                              v-if="submitted_reg && !$v.registerData.institute.required"
+                              v-if="submitted_reg && !$v.registerData.role.required"
                               class="invalid-feedback"
                             >
-                              Instansi harus dipilih!
+                              Akun harus dipilih!
                             </div>
                           </div>
 

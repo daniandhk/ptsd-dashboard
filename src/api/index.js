@@ -14,10 +14,10 @@ export function login(data){
 }
 export function validateUser(){
     return httpAxios({
-        url: '/auth/me',
+        url: '/auth/user',
         method: 'GET',
         // headers: {
-        //     Authorization: 'Bearer ' + store.getters.getLoggedUser.token,
+        //     Authorization: 'Bearer ' + store.getters.getLoggedUser.access_token,
         // },
     })
 }

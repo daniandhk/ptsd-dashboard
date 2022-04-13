@@ -12,19 +12,17 @@ export default [
                 if (store.getters.getLoggedUser) {
                     // Redirect to the home page instead
                     return api.validateUser().then(response => {
-                        // console.log(response.data)
-                        response.data.token = store.getters.getLoggedUser.token
-                        store.commit('LOGGED_USER', response.data)
+                        response.data.data.access_token = store.getters.getLoggedUser.access_token
+                        store.commit('LOGGED_USER', response.data.data)
 
                         let role = store.getters.getRoleUser
                         if (!role) {
-                            store.commit('ROLE_USER', response.data.roles[0].name)
+                            store.commit('ROLE_USER', response.data.data.role)
                         }
                         next({ name: 'home' })
                     })
                     .catch(error => {
                         store.dispatch('logOut')
-                        //console.log(error)
                         next({params: { tokenExpired: true }})
                     })
                     
@@ -36,7 +34,7 @@ export default [
         },
     },
     {
-        path: '/register',
+        path: '/register/:token',
         name: 'register',
         component: () => import('../../views/pages/auth/register'),
         meta: {
@@ -45,19 +43,17 @@ export default [
                 if (store.getters.getLoggedUser) {
                     // Redirect to the home page instead
                     return api.validateUser().then(response => {
-                        console.log(response.data)
-                        response.data.token = store.getters.getLoggedUser.token
-                        store.commit('LOGGED_USER', response.data)
+                        response.data.data.access_token = store.getters.getLoggedUser.access_token
+                        store.commit('LOGGED_USER', response.data.data)
 
                         let role = store.getters.getRoleUser
                         if (!role) {
-                            store.commit('ROLE_USER', response.data.roles[0].name)
+                            store.commit('ROLE_USER', response.data.data.role)
                         }
                         next({ name: 'home' })
                     })
                     .catch(error => {
                         store.dispatch('logOut')
-                        //console.log(error)
                         next({params: { tokenExpired: true }})
                     })
                     

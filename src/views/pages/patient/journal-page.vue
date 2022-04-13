@@ -109,7 +109,6 @@ export default {
                 loading();
             })
             .catch(error => {
-              console.log(error);
               loading();
             })
         );
@@ -158,7 +157,6 @@ export default {
                 })
                 .catch(error => {
                 loading();
-                console.log(error)
                 })
             );
         }
@@ -188,7 +186,6 @@ export default {
             })
             .catch(error => {
               loading();
-              console.log(error)
             })
         );
       }
@@ -214,7 +211,6 @@ export default {
             })
             .catch(error => {
               loading();
-              console.log(error)
             })
         );
       }

@@ -66,7 +66,7 @@ export default {
               this.isAuthError = false;
               this.loginSuccess = true;
 
-              this.$store.commit('LOGGED_USER', response.data);
+              this.$store.commit('LOGGED_USER', response.data.data);
               loading();
               // Redirect to the originally requested page, or to the home page
               this.$router.push(
@@ -76,7 +76,7 @@ export default {
             .catch(error => {
               loading();
               this.tryingToLogIn = false;
-              this.authError = error.response.data.error;
+              this.authError = error.response.data.message;
               this.isAuthError = true;
             })
         );
@@ -250,7 +250,7 @@ function loading() {
                             </p>
                           </div> -->
 
-                          <div class="mt-4 text-center">
+                          <div class="mt-4 mb-4 text-center">
                             <button
                               class="btn btn-primary w-md waves-effect waves-light"
                               type="submit"
@@ -260,7 +260,7 @@ function loading() {
                             </button>
                           </div>
                         </form>
-                        <div class="m-3 text-center">
+                        <!-- <div class="m-3 text-center">
                           <p>Atau</p>
                         </div>
                         <div class="mb-4 text-center">
@@ -271,7 +271,7 @@ function loading() {
                           >
                             Registrasi
                           </button>
-                        </div>
+                        </div> -->
                       </div>
 
                       <div

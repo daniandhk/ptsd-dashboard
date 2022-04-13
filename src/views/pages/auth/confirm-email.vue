@@ -33,20 +33,21 @@ export default {
       api.validateUser()
             // eslint-disable-next-line no-unused-vars
         .then(response => {
-          if(response.data){
-            if(response.data.email_verified_at != null){
+          if(response.data.data){
+            if(response.data.data.email_verified_at != null){
               this.isConfirmFailed = false;
               window.location.reload();
             }
             else{
               this.isConfirmFailed = true;
+              this.isResendSuccess = false;
+              this.isResendDisabled = false;
             }
           }
           loading();
         })
         .catch(error => {
           loading();
-          console.log(error)
         })
     },
 
@@ -58,10 +59,10 @@ export default {
           loading();
           this.isResendSuccess = true;
           this.isResendDisabled = true;
+          this.isConfirmFailed = false;
         })
         .catch(error => {
           loading();
-          console.log(error)
         })
     }
   }
@@ -93,7 +94,7 @@ function loading() {
       />
     </div>
     <div
-      style="min-height: 100%; display: flex;"
+      style="min-height: 100%; display: flex; align-items: center; justify-content: center;"
     >
       <div
         class="card h-100 m-5"
@@ -105,16 +106,29 @@ function loading() {
               class="mr-5 ml-5 mt-2 mb-3"
               style="flex-direction: column;"
             >
-              <p
-                style="color:#005C9A; font-size:24px; text-align:center; font-weight: bold; margin-bottom:0!important"
-              >
-                Harap verifikasi email Anda!
-              </p>
-              <p
-                style="font-size:16px; text-align:center; margin-top:0!important"
-              >
-                Terima kasih telah mendaftarkan akun! Silahkan cek email Anda untuk verifikasi.
-              </p>
+              <div class="text-center">
+                <div class="row justify-content-center">
+                  <img
+                    src="@/assets/logo-mini.png"
+                    height="80"
+                    alt="logo"
+                  >
+                  <div class="ml-3 mt-3 text-left">
+                    <h4
+                      class="font-size-24"
+                      style="margin-bottom:0!important; text-weight: bold; color:#005C9A;"
+                    >
+                      Harap verifikasi email!
+                    </h4>
+                    <p
+                      class="font-size-20 mt-0"
+                      style="font-weight: normal;"
+                    >
+                      Silahkan cek email Anda atau kirim ulang.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <b-alert
                 v-model="isResendSuccess"
@@ -129,12 +143,11 @@ function loading() {
                 variant="danger"
                 class="mt-3"
                 show
-                dismissible
               >
                 Email belum diverifikasi! Harap cek kembali email Anda.
               </b-alert>
 
-              <div class="mt-2">
+              <div class="mt-4">
                 <button 
                   type="button"
                   class="btn btn-secondary m-1" 
