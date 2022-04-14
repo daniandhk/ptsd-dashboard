@@ -5,6 +5,9 @@ import * as api from '@/api';
 import Multiselect from "vue-multiselect";
 
 export default {
+  page: {
+    title: "Register",
+  },
   components: {
       Multiselect,
   },
@@ -14,14 +17,16 @@ export default {
       registerError: null,
       isRegisterError: false,
       registerData: {
-        role: "psychologist",
+        role: "",
 				email: "",
         password: "",
         password_confirmation: "",
 			},
 
-      role_data: {name: "Psikolog / Staff", role: "psychologist"},
-      dropdownRole: [{name: "Psikolog / Staff", role: "psychologist"}, {name: "Pasien", role: "patient"}]
+      role_data: "",
+      dropdownRole: [{name: "Psikolog", role: "psychologist"}, {name: "Pasien", role: "patient"}],
+
+      is_patient: true,
     };
   },
   computed: {
@@ -29,8 +34,10 @@ export default {
       return this.$store ? this.$store.state.notification : null;
     }
   },
-  created() {
+  beforeMount() {
     this.checkToken();
+  },
+  created() {
     document.body.classList.add("auth-body-bg");
   },
   validations: {
@@ -56,6 +63,36 @@ export default {
 
     checkToken(){
       let token = this.$route.params.token;
+      if(token){
+        api.checkTokenRegister(token)
+          .then(response => {
+            if(response.data.data){
+              if(response.data.data.is_valid){
+                this.is_patient = false
+                this.registerData.role = "psychologist"
+                this.role_data = {name: "Psikolog", role: "psychologist"}
+              }
+              else{
+                this.is_patient = true
+                this.registerData.role = "patient"
+                this.role_data = {name: "Pasien", role: "patient"}
+              }
+            }
+            else{
+              this.is_patient = true
+              this.registerData.role = "patient"
+              this.role_data = {name: "Pasien", role: "patient"}
+            }
+          })
+          .catch(error => {
+            //
+          })
+      }
+      else{
+        this.is_patient = true
+        this.registerData.role = "patient"
+        this.role_data = {name: "Pasien", role: "patient"}
+      }
     },
 
     tryToRegister() {
@@ -139,7 +176,10 @@ function loading() {
                         <h4 class="font-size-18 mt-4">
                           Registrasi {{ role_data.name }}
                         </h4>
-                        <p class="text-muted">
+                        <p
+                          v-if="is_patient"
+                          class="text-muted"
+                        >
                           Kelola gangguan PTSD Anda bersama kami
                         </p>
                       </div>
@@ -168,7 +208,10 @@ function loading() {
                           class="form-horizontal"
                           @submit.prevent="tryToRegister"
                         >
-                          <div class="form-group mb-4">
+                          <div
+                            v-if="!is_patient"
+                            class="form-group mb-4"
+                          >
                             <label for="akun">Akun</label>
                             <multiselect
                               v-model="role_data"

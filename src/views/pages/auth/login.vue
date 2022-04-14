@@ -4,6 +4,9 @@ import { notificationMethods } from "@/state/helpers";
 import * as api from '@/api';
 
 export default {
+  page: {
+    title: "Login",
+  },
   components: {
     //
   },
@@ -261,7 +264,7 @@ function loading() {
                             </button>
                           </div>
                         </form>
-                        <!-- <div class="m-3 text-center">
+                        <div class="m-3 text-center">
                           <p>Atau</p>
                         </div>
                         <div class="mb-4 text-center">
@@ -272,7 +275,7 @@ function loading() {
                           >
                             Registrasi
                           </button>
-                        </div> -->
+                        </div>
                       </div>
 
                       <div

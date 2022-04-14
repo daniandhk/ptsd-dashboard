@@ -28,6 +28,9 @@ export function register(data){
         data: data
     })
 }
+export function checkTokenRegister(token){
+    return httpAxios.get(`/register/show/${token}`);
+}
 
 // export function changePassword(data){
 //     return httpAxios({

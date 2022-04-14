@@ -34,7 +34,7 @@ export default [
         },
     },
     {
-        path: '/register/:token',
+        path: '/register/:token?',
         name: 'register',
         component: () => import('../../views/pages/auth/register'),
         meta: {
