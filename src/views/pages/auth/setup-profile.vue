@@ -206,7 +206,7 @@ function loading() {
                           v-if="submitted && !$v.profileData.first_name.required" 
                           class="invalid-feedback"
                         >
-                          Nam Depan harus diisi!
+                          Nama Depan harus diisi!
                         </div>
                       </div>
 

@@ -1,8 +1,8 @@
 import httpAxios from '@/httpAxios.js';
 // import store from '@/store'
 
-//asprak
 export * from "./patient.js";
+export * from "./psychologist.js";
 
 //auth
 export function login(data){
