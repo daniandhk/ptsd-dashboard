@@ -5,6 +5,7 @@ import * as api from '@/api';
 import Topbar from "@/components/topbar-patient";
 import ConfirmEmail from "@/views/pages/auth/confirm-email";
 import SetupProfile from "@/views/pages/auth/setup-profile";
+import SetupGuardian from "@/views/pages/auth/setup-guardian";
 import MainPage from "./patient/main-page"
 
 export default {
@@ -16,6 +17,7 @@ export default {
     Topbar,
     ConfirmEmail,
     SetupProfile,
+    SetupGuardian,
     MainPage,
   },
   data() {
@@ -23,6 +25,7 @@ export default {
       user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
       viewEmail: false,
       viewProfile: false,
+      viewGuardian: false,
     };
   },
   computed: {
@@ -42,14 +45,22 @@ export default {
         if(this.user.email_verified_at == null){
           this.viewEmail = true
           this.viewProfile = false
+          this.viewGuardian = false
         }
         else if(this.user.profile == null){
           this.viewEmail = false
           this.viewProfile = true
+          this.viewGuardian = false
+        }
+        else if(this.user.profile.guardian == null){
+          this.viewEmail = false
+          this.viewProfile = false
+          this.viewGuardian = true
         }
         else{
           this.viewEmail = false
           this.viewProfile = false
+          this.viewGuardian = false
         }
       }
     },
@@ -63,7 +74,8 @@ export default {
     <div style="overflow-x: hidden;">
       <ConfirmEmail v-if="viewEmail" />
       <SetupProfile v-if="viewProfile" />
-      <MainPage v-if="!viewEmail && !viewProfile" />
+      <SetupGuardian v-if="viewGuardian" />
+      <MainPage v-if="!viewEmail && !viewProfile && !viewGuardian" />
     </div>
   </div>
 </template>

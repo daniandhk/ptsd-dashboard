@@ -3,44 +3,36 @@ import { required, minLength, sameAs } from "vuelidate/lib/validators";
 import { notificationMethods } from "@/state/helpers";
 import * as api from '@/api';
 import Multiselect from "vue-multiselect";
-import regions from './regions.json';
-import DatePicker from "vue2-datepicker";
 import store from '@/store';
 
 export default {
   components: {
     Multiselect,
-    DatePicker,
   },
   data() {
     return {
       user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
-      regions: regions,
-      cities: [],
-      data_province: "",
+      
+      statusData: [{name: "Orang tua", status: "Orang tua"}, {name: "Kerabat", status: "Kerabat"}, {name: "Lainnya", status: ""}],
+      data_status: {name: "Orang tua", status: "Orang tua"},
+      is_other: false,
 
-      isProvinceSelected: false,
       submitted: false,
       registerError: null,
       isRegisterError: false,
       profileData: {
-          province: "",
-          city: "",
-          datebirth: "",
-          first_name: "",
-          last_name: "",
+          full_name: "",
+          status: "Orang tua",
           phone: "",
+          is_available: false,
       },
       
     };
   },
   validations: {
     profileData: {
-      province: { required },
-      city: { required },
-      datebirth: { required },
-      first_name: { required },
-      last_name: { required },
+      full_name: { required },
+      status: { required },
       phone: { required },
     }
   },
@@ -58,7 +50,6 @@ export default {
     tryToRegister(){
       loading();
       this.submitted = true;
-      this.profileData.province = this.data_province.provinsi;
       // stop here if form is invalid
       this.$v.profileData.$touch();
 
@@ -67,9 +58,9 @@ export default {
         return;
       } else {
         this.registerError = null;
-        this.profileData.user_id = this.user.id;
+        this.profileData.patient_id = this.user.profile.id;
         return (
-          api.inputProfilePatient(this.profileData)
+          api.inputGuardian(this.profileData)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
               loading();
@@ -84,16 +75,14 @@ export default {
       }
     },
 
-    selectProvince(value){
-        this.profileData.city = ""
-        this.cities = value.kota
-        this.isProvinceSelected = true
-    },
-
-    removeProvince(){
-        this.profileData.city = ""
-        this.cities = []
-        this.isProvinceSelected = false
+    selectStatus(value){
+        this.profileData.status = value.status
+        if(value.status == ""){
+            this.is_other = true
+        }
+        else{
+            this.is_other = false
+        }
     },
   }
 };
@@ -149,13 +138,13 @@ function loading() {
                         class="font-size-24"
                         style="margin-bottom:0!important; text-weight: bold; color:#005C9A;"
                       >
-                        Selamat Datang!
+                        Informasi Wali
                       </h4>
                       <p
-                        class="font-size-20 mt-0"
+                        class="font-size-16 mt-0"
                         style="font-weight: normal;"
                       >
-                        Pertama, atur profil Anda.
+                        Selanjutnya isi informasi wali yang dapat dihubungi.
                       </p>
                     </div>
                   </div>
@@ -187,47 +176,22 @@ function loading() {
                     @submit.prevent="tryToRegister"
                   >
                     <div
-                      class="row col-md-12"
-                      style="padding:0!important; margin:0!important"
+                      class="form-group text-left"
+                      style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
                     >
-                      <div
-                        class="form-group text-left col-md-6"
-                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                      <label for="full_name">Nama Lengkap</label>
+                      <input
+                        id="full_name"
+                        v-model="profileData.full_name"
+                        type="text"
+                        class="form-control"
+                        :class="{ 'is-invalid': submitted && $v.profileData.full_name.$error }"
                       >
-                        <label for="first_name">Nama Depan</label>
-                        <input
-                          id="first_name"
-                          v-model="profileData.first_name"
-                          type="text"
-                          class="form-control"
-                          :class="{ 'is-invalid': submitted && $v.profileData.first_name.$error }"
-                        >
-                        <div 
-                          v-if="submitted && !$v.profileData.first_name.required" 
-                          class="invalid-feedback"
-                        >
-                          Nam Depan harus diisi!
-                        </div>
-                      </div>
-
-                      <div
-                        class="form-group text-left col-md-6"
-                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                      <div 
+                        v-if="submitted && !$v.profileData.full_name.required" 
+                        class="invalid-feedback"
                       >
-                        <label for="last_name">Nama Belakang</label>
-                        <input
-                          id="last_name"
-                          v-model="profileData.last_name"
-                          type="text"
-                          class="form-control"
-                          :class="{ 'is-invalid': submitted && $v.profileData.last_name.$error }"
-                        >
-                        <div 
-                          v-if="submitted && !$v.profileData.last_name.required" 
-                          class="invalid-feedback"
-                        >
-                          Nama Belakang harus diisi!
-                        </div>
+                        Nama Lengkap harus diisi!
                       </div>
                     </div>
 
@@ -235,24 +199,40 @@ function loading() {
                       class="form-group text-left"
                       style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
                     >
-                      <label for="phone">Tanggal Lahir</label>
-                      <date-picker
-                        v-model="profileData.datebirth"
-                        :first-day-of-week="1" 
-                        lang="en"
-                        value-type="format"
-                        :class="{ 'is-invalid': submitted && $v.profileData.datebirth.$error }"
+                      <label>Status Wali</label>
+                      <multiselect
+                        v-model="data_status"
+                        :options="statusData"
+                        :show-labels="false"
+                        :allow-empty="false"
+                        label="name"
+                        track-by="status"
+                        @select="selectStatus"
                       />
-                      <div
-                        v-if="submitted && !$v.profileData.datebirth.required"
+                    </div>
+
+                    <div
+                      v-if="is_other"
+                      class="form-group text-left"
+                      style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                    >
+                      <input
+                        v-model="profileData.status"
+                        placeholder="isi status disini"
+                        type="text"
+                        class="form-control"
+                        :class="{ 'is-invalid': submitted && $v.profileData.status.$error }"
+                      >
+                      <div 
+                        v-if="submitted && !$v.profileData.status.required" 
                         class="invalid-feedback"
                       >
-                        Tanggal Lahir harus diisi!
+                        Status Wali harus diisi!
                       </div>
                     </div>
 
                     <div
-                      class="form-group mb-3 text-left"
+                      class="form-group text-left"
                       style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
                     >
                       <label for="phone">No. Telepon</label>
@@ -272,51 +252,20 @@ function loading() {
                     </div>
 
                     <div
-                      class="row col-md-12"
-                      style="padding:0!important; margin:0!important"
+                      class="form-group text-left mt-4"
+                      style="padding:0!important; padding-left: 24px!important; padding-right:2px!important;"
                     >
-                      <div
-                        class="form-group text-left col-md-6"
-                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                      <input
+                        v-model="profileData.is_available"
+                        class="form-check-input"
+                        type="checkbox"
                       >
-                        <label for="instansi">Provinsi</label>
-                        <multiselect
-                          v-model="data_province"
-                          :options="regions"
-                          label="provinsi"
-                          track-by="provinsi"
-                          :show-labels="false"
-                          :class="{ 'is-invalid': submitted && $v.profileData.province.$error }"
-                          @select="selectProvince"
-                          @remove="removeProvince"
-                        />
-                        <div
-                          v-if="submitted && !$v.profileData.province.required"
-                          class="invalid-feedback"
-                        >
-                          Provinsi harus dipilih!
-                        </div>
-                      </div>
-
-                      <div
-                        class="form-group text-left col-md-6"
-                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
-                      >
-                        <label for="instansi">Kota</label>
-                        <multiselect
-                          v-model="profileData.city"
-                          :disabled="!isProvinceSelected"
-                          :options="cities"
-                          :show-labels="false"
-                          :class="{ 'is-invalid': submitted && $v.profileData.city.$error }"
-                        />
-                        <div
-                          v-if="submitted && !$v.profileData.city.required"
-                          class="invalid-feedback"
-                        >
-                          Kota harus dipilih!
-                        </div>
-                      </div>
+                      <label
+                        for="checkbox"
+                        class="mb-0"
+                      >Izinkan informasi wali diakses oleh psikolog?</label>
+                      <br>
+                      <span class="text-muted">Izin dapat diubah kapan saja.</span>
                     </div>
 
                     <div class="mt-4 text-center">

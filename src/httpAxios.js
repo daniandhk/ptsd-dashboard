@@ -32,7 +32,10 @@ service.interceptors.request.use(config => {
         ) &&
         !Cookies.get('XSRF-TOKEN')) {
         return setCSRFToken()
-            .then(response => config);
+            .then(response => config)
+            .catch(error => {
+                //
+            })
     }
 
     return config

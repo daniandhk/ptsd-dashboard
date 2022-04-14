@@ -16,6 +16,14 @@ export function inputProfilePatient(data){
     })
 }
 
+export function inputGuardian(data){
+    return httpAxios({
+        url: '/guardian/create',
+        method: 'POST',
+        data: data
+    })
+}
+
 export function getDashboard(user_id){
     return httpAxios({
         url: `/patient/dashboard/${user_id}`,
