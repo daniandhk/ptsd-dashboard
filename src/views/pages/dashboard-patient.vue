@@ -69,7 +69,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div style="min-height:100vh">
     <Topbar />
     <div style="overflow-x: hidden;">
       <ConfirmEmail v-if="viewEmail" />

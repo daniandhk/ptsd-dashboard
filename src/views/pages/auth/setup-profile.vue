@@ -232,7 +232,7 @@ function loading() {
                     </div>
 
                     <div
-                      class="form-group text-left"
+                      class="form-group text-left datepicker-div"
                       style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
                     >
                       <label for="phone">Tanggal Lahir</label>
@@ -361,3 +361,9 @@ function loading() {
     </div>
   </div>
 </template>
+
+<style scoped>
+  .datepicker-div >>> input {
+    height:38.64px;
+  }
+</style>

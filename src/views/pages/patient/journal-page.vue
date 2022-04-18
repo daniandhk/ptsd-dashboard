@@ -4,12 +4,13 @@ import { notificationMethods } from "@/state/helpers";
 import * as api from '@/api';
 import moment from 'moment';
 import Swal from "sweetalert2";
-import Topbar from "@/components/topbar-patient";
 import { required } from "vuelidate/lib/validators";
+import DatePicker from "vue2-datepicker";
+import 'vue2-datepicker/locale/id'
 
 export default {
   components: {
-    Topbar,
+    DatePicker,
   },
   validations: {
       data_journal: {
@@ -102,8 +103,8 @@ export default {
           api.getJournalDashboard(this.user.id, params)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
-                if(response.data.data.data){
-                    this.dashboard = response.data.data.data;
+                if(response.data.data){
+                    this.dashboard = response.data.data;
                     this.setDashboard();
                 }
                 loading();
@@ -182,7 +183,8 @@ export default {
             // eslint-disable-next-line no-unused-vars
             .then(response => {
               loading();
-              window.location.reload();
+              this.submitted_journal = false;
+              this.getDashboard(this.today);
             })
             .catch(error => {
               loading();
@@ -207,7 +209,8 @@ export default {
             // eslint-disable-next-line no-unused-vars
             .then(response => {
               loading();
-              window.location.reload();
+              this.submitted_journal = false;
+              this.getDashboard(this.today);
             })
             .catch(error => {
               loading();
@@ -240,6 +243,10 @@ export default {
         this.getDashboard(this.date);
     },
 
+    onDateButtonClick(){
+      this.getDashboard(this.date);
+    },
+
     formattedDate(date){
         return moment(date).locale('id').format('LL');
     }
@@ -258,24 +265,47 @@ function loading() {
 
 <template>
   <div>
-    <Topbar />
-    <div class="pt-5">
-      <div
-        id="loading"
-        style="display:none; z-index:100; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
-      >
-        <b-spinner
-          style="width: 3rem; height: 3rem;"
-          class="m-2"
-          variant="warning"
-          role="status"
-        />
-      </div>
-      <div
-        class="m-5"
-        style="display: flex; align-items: center; justify-content: center; height: 100%;"
-      >
-        <div class="col-sm-8">
+    <div
+      id="loading"
+      style="display:none; z-index:100; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+    >
+      <b-spinner
+        style="width: 3rem; height: 3rem;"
+        class="m-2"
+        variant="warning"
+        role="status"
+      />
+    </div>
+    <div class="container-fluid">
+      <div class="row no-gutters p-4">
+        <div class="col-lg-4 pl-2 pr-2">
+          <div
+            class="card"
+            style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
+          >
+            <div class="card-body">
+              <div class="text-center mb-0">
+                <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                  <i
+                    style="font-size:80px;color:#005C9A;"
+                    class="mdi mdi-calendar-heart"
+                  />
+                  <p
+                    style="color:#005C9A; font-size:18px; text-align:center; font-weight: bold;"
+                  >
+                    Jurnal dan Catatan Psikolog
+                  </p>
+                  <p
+                    style="color:#005C9A; font-size:14px; text-align:center;"
+                  >
+                    Membuat jurnal pribadi dan mendapatkan catatan rekomendasi kegiatan dari psikolog selama jeda konsultasi.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8 pl-2 pr-2">
           <div
             class="card"
             style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
@@ -283,34 +313,16 @@ function loading() {
             <div class="card-body mt-2 ml-2 mr-2">
               <div class="text-center form-group mb-0">
                 <div>
-                  <i
-                    style="font-size:50px; color:#005C9A;"
-                    class="mdi mdi-calendar-heart"
-                  />
-                  <h5
-                    class="text-center font-size-15 text-uppercase"
-                    style="color:#005C9A;"
-                  >
-                    Jurnal dan Catatan Psikolog
-                  </h5>
-                  <hr
-                    style="margin-left: -28px; 
-                            margin-right: -28px; 
-                            height: 4px; 
-                            background-color: #eee; 
-                            border: 0 none; 
-                            color: #eee;"
-                  >
                   <div class="row">
-                    <div class="col-sm-4 mt-2 mb-2">
-                      <a href="/">
-                        <i
-                          class="mdi mdi-home-variant"
-                          style="font-size:25px; color:grey;"
-                        />
-                      </a>
+                    <div class="col-lg-4 mt-2 mb-2">
+                    <!-- <a href="/">
+                      <i
+                        class="mdi mdi-home-variant"
+                        style="font-size:25px; color:grey;"
+                      />
+                    </a> -->
                     </div>
-                    <div class="col-sm-4 mt-2 mb-2">
+                    <div class="col-lg-4 mt-2 mb-2">
                       <div style="display: flex; align-items: center; justify-content: center;">
                         <a
                           href="#"
@@ -321,22 +333,40 @@ function loading() {
                             style="font-size:25px; color:#005C9A;"
                           />
                         </a>
-                        <button 
-                          v-if="!isToday"
-                          type="button"
-                          class="btn btn-light btn-md mr-2 ml-2"
-                          disabled
-                        >
-                          {{ formattedDate(date) }}
-                        </button>
-                        <button 
+                        <div
                           v-if="isToday"
-                          type="button"
-                          class="btn btn-primary btn-md mr-2 ml-2"
-                          style="background-color:#005C9A;"
+                          v-b-tooltip.hover
+                          title="pilih tanggal"
+                          class="datepicker-today mr-2 ml-2"
                         >
-                          {{ formattedDate(date) }}
-                        </button>
+                          <date-picker
+                            v-model="date"
+                            :first-day-of-week="1" 
+                            lang="id"
+                            format="dddd, D MMMM YYYY"
+                            value-type="YYYY-MM-DD"
+                            :clearable="false"
+                            :editable="false"
+                            @input="onDateButtonClick"
+                          />
+                        </div>
+                        <div
+                          v-if="!isToday"
+                          v-b-tooltip.hover
+                          title="pilih tanggal"
+                          class="datepicker-other mr-2 ml-2"
+                        >
+                          <date-picker
+                            v-model="date"
+                            :first-day-of-week="1" 
+                            lang="id"
+                            format="dddd, D MMMM YYYY"
+                            value-type="YYYY-MM-DD"
+                            :clearable="false"
+                            :editable="false"
+                            @input="onDateButtonClick"
+                          />
+                        </div>
                         <a
                           href="#"
                           @click="onNextButtonClick()"
@@ -348,7 +378,7 @@ function loading() {
                         </a>
                       </div>
                     </div>
-                    <div class="col-sm-4 mt-2 mb-2">
+                    <div class="col-lg-4 mt-2 mb-2">
                       <button 
                         v-if="!isToday"
                         type="button"
@@ -361,6 +391,7 @@ function loading() {
                       <button 
                         v-if="isToday"
                         type="button"
+                        disabled
                         class="btn btn-outline-dark m-1 btn-sm"
                       >
                         Hari Ini
@@ -381,9 +412,12 @@ function loading() {
                       style="display: flex; justify-content: center;"
                     >
                       <div style="width:100%;">
-                        <div class="mb-2 mt-2">
-                          Jurnal
-                        </div>
+                        <h5
+                          class="p-2 text-center font-size-15 text-uppercase"
+                          style="color:#005C9A;"
+                        >
+                          Jurnal Harian
+                        </h5>
                         <div class="mr-5 ml-5">
                           <textarea 
                             v-model="data_journal.text"
@@ -416,7 +450,7 @@ function loading() {
                             style=" width:100%;"
                             @click="onUpdateJournalButtonClick()"
                           >
-                            Update
+                            Perbarui
                           </button>
                           <button 
                             v-if="!isToday && isJournalNull"
@@ -442,7 +476,21 @@ function loading() {
                         class="mt-5"
                         style="width:100%;"
                       >
+                        <hr
+                          style="margin-left: -16px; 
+                            margin-right: -16px; 
+                            height: 2px; 
+                            background-color: #eee; 
+                            border: 0 none; 
+                            color: #eee;"
+                        >
                         <div style="width:100%;">
+                          <h5
+                            class="p-2 text-center font-size-15 text-uppercase"
+                            style="color:#005C9A;"
+                          >
+                            Catatan Psikolog
+                          </h5>
                           <div class="table-responsive">
                             <b-table
                               class="table-centered"
@@ -456,7 +504,12 @@ function loading() {
                               :filter="filter"
                               :head-variant="'dark'"
                               :filter-included-fields="filterOn"
+                              show-empty
                             >
+                              <!-- eslint-disable-next-line vue/no-unused-vars -->
+                              <template #empty="scope">
+                                data masih kosong untuk saat ini.
+                              </template>
                               <template v-slot:cell(answer)="data">
                                 <input
                                   v-model="data.item.answer"
@@ -513,3 +566,25 @@ function loading() {
     </div>
   </div>
 </template>
+
+<style scoped>
+  .datepicker-today >>> input {
+    height:38.64px;
+    background-color: #005C9A;
+    color: white;
+    text-align:center;
+  }
+  .datepicker-today >>> i {
+    color: white;
+  }
+
+  .datepicker-other >>> input {
+    height:38.64px;
+    background-color: #eff2f7;
+    color: #212529;
+    text-align:center;
+  }
+  .datepicker-other >>> i {
+    color: #212529;
+  }
+</style>

@@ -229,7 +229,7 @@ function loading() {
                     </div>
 
                     <div
-                      class="form-group text-left"
+                      class="form-group text-left datepicker-div"
                       style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
                     >
                       <label for="phone">Tanggal Lahir</label>
@@ -273,17 +273,17 @@ function loading() {
                       </div>
 
                       <div
-                        class="form-group text-left col-md-6"
+                        class="form-group text-left col-md-6 datepicker-div"
                         style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
                       >
                         <label for="graduation_year">Tahun Lulus</label>
-                        <input
-                          id="graduation_year"
+                        <date-picker
                           v-model="profileData.graduation_year"
-                          type="text"
-                          class="form-control"
+                          type="year"
+                          value-type="format"
+                          format="YYYY"
                           :class="{ 'is-invalid': submitted && $v.profileData.graduation_year.$error }"
-                        >
+                        />
                         <div 
                           v-if="submitted && !$v.profileData.graduation_year.required" 
                           class="invalid-feedback"
@@ -430,3 +430,9 @@ function loading() {
     </div>
   </div>
 </template>
+
+<style scoped>
+  .datepicker-div >>> input {
+    height:38.64px;
+  }
+</style>
