@@ -1,7 +1,7 @@
 export default [
     {
-        path: '/pds5',      
-        name: 'pds5-landing',
+        path: '/test/:test_type',      
+        name: 'test-landing',
         meta: {
             authRequired: true,
             beforeResolve(routeTo, routeFrom, next) {
@@ -13,47 +13,47 @@ export default [
                 }
             },
         },
-        component: () => import('../../views/pages/patient/pds5/landing-page')
+        component: () => import('../../views/pages/patient/test/landing-page')
     },
     {
-        path: '/pds5/test',      
-        name: 'pds5-test',
+        path: '/test/:test_type/start',      
+        name: 'test-start',
         meta: {
             authRequired: true,
             beforeResolve(routeTo, routeFrom, next) {
-                if(routeFrom.name != "pds5-landing"){
-                    next({ name: 'pds5-landing' })
+                if(routeFrom.name != "test-landing"){
+                    next({ name: 'test-landing', params: { test_type: this.$route.params.test_type } })
                 }
                 else{
                     next()
                 }
             },
         },
-        component: () => import('../../views/pages/patient/pds5/tests-page')
+        component: () => import('../../views/pages/patient/test/index')
     },
     {
-        path: '/pds5/finished',      
-        name: 'pds5-finished',
+        path: '/test/:test_type/finished',      
+        name: 'test-finished',
         meta: {
             authRequired: true,
             beforeResolve(routeTo, routeFrom, next) {
-                if(routeFrom.name != "pds5-test"){
-                    next({ name: 'pds5-landing' })
+                if(routeFrom.name != "test-start"){
+                    next({ name: 'test-landing' })
                 }
                 else{
                     next()
                 }
             },
         },
-        component: () => import('../../views/pages/patient/pds5/finished-page')
+        component: () => import('../../views/pages/patient/test/finished-page')
     },
     {
-        path: '/pds5/test/:test_id',      
-        name: 'pds5-answer',
+        path: '/test/:test_type/review/:test_id/:patient_id',      
+        name: 'test-review',
         meta: {
             authRequired: true,
         },
-        component: () => import('../../views/pages/pds5/tests-page')
+        component: () => import('../../views/pages/patient/test/index')
     },
     {
         path: '/journal',      

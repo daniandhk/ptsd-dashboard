@@ -1,5 +1,6 @@
 <script>
 import { notificationMethods } from "@/state/helpers";
+import * as api from '@/api';
 
 export default {
   components: {
@@ -7,7 +8,8 @@ export default {
   },
   data() {
     return {
-        //
+        test_type: this.$route.params.test_type,
+        test: "",
     };
   },
   computed: {
@@ -18,10 +20,49 @@ export default {
   created() {
     document.body.classList.add("auth-body-bg");
   },
+  mounted() {
+      this.checkAuth();
+  },
   methods: {
     ...notificationMethods,
 
-    onStartButtonClick(){
+    getRequestParams(test_type) {
+      let params = {};
+
+      if (test_type) {
+        params["test_type"] = test_type;
+      }
+
+      return params;
+    },
+
+    checkAuth(){
+        loading();
+        const params = this.getRequestParams(
+            this.test_type,
+        );
+        return api.getTestTypes(params)
+            // eslint-disable-next-line no-unused-vars
+            .then(response => {
+                if(response.data.data.length > 0){
+                    this.test = response.data.data[0]
+                }
+                else{
+                    this.$router.replace({
+                        name: 'error-404'
+                    });
+                }
+                loading();
+            })
+            .catch(error => {
+                loading();
+                this.$router.replace({
+                    name: 'error-404'
+                });
+            })
+    },
+
+    onFinishButtonClick(){
       this.$router.replace({
           name: 'home'
       });
@@ -85,12 +126,11 @@ function loading() {
                         class="font-size-20 mt-0"
                         style="font-weight: normal;"
                       >
-                        PDS-5
+                        {{ test.name }}
                       </p>
                     </div>
                   </div>
                 </div>
-
                 <div class="p-2 mt-4">
                   <div>
                     <div
@@ -106,7 +146,7 @@ function loading() {
                             <b style="font-size:20px">Tes telah berakhir!</b><br>Jawaban Anda berhasil disimpan.
                           </p>
                           <p>
-                            <b style="font-size:20px">Tahap selanjutnya adalah verifikasi jawaban dengan psikolog melalui Video Call.</b><br>Jadwal dan tautan / link Video Call akan segera diinformasikan melalui email.
+                            <b style="font-size:20px">Tahap selanjutnya adalah verifikasi jawaban dengan psikolog melalui Video Call.</b><br>Jadwal dan tautan / link Video Call akan ditampilkan di menu utama.
                           </p>
                         </div>
                       </div>
@@ -118,7 +158,7 @@ function loading() {
                       <button
                         class="btn btn-primary w-md waves-effect waves-light m-1"
                         style="background-color:#005C9A; min-width:100%;"
-                        @click="onStartButtonClick()"
+                        @click="onFinishButtonClick()"
                       >
                         Selesai
                       </button>

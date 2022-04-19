@@ -65,3 +65,7 @@ export function createRelation(data){
 export function showTest(test_id){
     return httpAxios.get(`/test/show/${test_id}`);
 }
+
+export function getTestTypes(params){
+    return httpAxios.get(`/testtype`, { params });
+}

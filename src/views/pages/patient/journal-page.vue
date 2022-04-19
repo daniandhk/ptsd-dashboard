@@ -139,6 +139,10 @@ export default {
         }
     },
 
+    async refreshData(){
+      await this.getDashboard(this.today);
+    },
+
     onSubmitAnswerButtonClick(data){
         if(data.answer == null){
             return

@@ -29,7 +29,18 @@ export default {
     ...notificationMethods,
     
     refreshData(value){
-      //
+      switch(value) {
+        case 0:
+          return this.$refs.Test.refreshData();
+        case 1:
+          return this.$refs.Consult.refreshData();
+        case 2:
+          return this.$refs.Journal.refreshData();
+        default:
+          this.$refs.Test.refreshData();
+          this.$refs.Consult.refreshData();
+          return this.$refs.Journal.refreshData();
+      }
     },
   },
 };
@@ -86,7 +97,7 @@ function loading() {
               </p>
             </div>
           </template>
-          <Test />
+          <Test ref="Test" />
         </b-tab>
         <b-tab
           title-link-class="p-3"
@@ -105,7 +116,7 @@ function loading() {
               </p>
             </div>
           </template>
-          <Consult />
+          <Consult ref="Consult" />
         </b-tab>
         <b-tab
           title-link-class="p-3"
@@ -124,7 +135,7 @@ function loading() {
               </p>
             </div>
           </template>
-          <Journal />
+          <Journal ref="Journal" />
         </b-tab>
       </b-tabs>
     </div>

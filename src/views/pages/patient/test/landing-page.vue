@@ -8,7 +8,8 @@ export default {
   },
   data() {
     return {
-        //
+        test_type: this.$route.params.test_type,
+        test: "",
     };
   },
   computed: {
@@ -19,8 +20,47 @@ export default {
   created() {
     document.body.classList.add("auth-body-bg");
   },
+  mounted() {
+      this.checkAuth();
+  },
   methods: {
     ...notificationMethods,
+
+    getRequestParams(test_type) {
+      let params = {};
+
+      if (test_type) {
+        params["test_type"] = test_type;
+      }
+
+      return params;
+    },
+
+    checkAuth(){
+        loading();
+        const params = this.getRequestParams(
+            this.test_type,
+        );
+        return api.getTestTypes(params)
+            // eslint-disable-next-line no-unused-vars
+            .then(response => {
+                if(response.data.data.length > 0){
+                    this.test = response.data.data[0]
+                }
+                else{
+                    this.$router.replace({
+                        name: 'error-404'
+                    });
+                }
+                loading();
+            })
+            .catch(error => {
+                loading();
+                this.$router.replace({
+                    name: 'error-404'
+                });
+            })
+    },
 
     onBackButtonClick(){
       this.$router.push({
@@ -30,7 +70,8 @@ export default {
 
     onStartButtonClick(){
       this.$router.replace({
-          name: 'pds5-test'
+          name: 'test-start', 
+          params: { test_type: this.test_type }
       });
     },
   }
@@ -92,12 +133,11 @@ function loading() {
                         class="font-size-20 mt-0"
                         style="font-weight: normal;"
                       >
-                        PDS-5
+                        {{ test.name }}
                       </p>
                     </div>
                   </div>
                 </div>
-
                 <div class="p-2 mt-4">
                   <div>
                     <div
@@ -110,10 +150,10 @@ function loading() {
                       >
                         <div style="color:black;">
                           <p class="mb-4">
-                            Tes penilaian diri PTSD dilakukan untuk mengukur tingkat keparahan gejala PTSD selama <b>SATU BULAN</b> terakhir.
+                            Tes penilaian diri PTSD dilakukan untuk mengukur tingkat keparahan gejala PTSD selama <b>{{ test.delay_days }} HARI</b> terakhir.
                           </p>
                           <p class="mb-4">
-                            Tes ini menggunakan Posttraumatic Diagnostic Scale (PDS-5) yang berdasarkan kriteria DSM-5.
+                            Tes ini menggunakan {{ test.name }}: {{ test.description }}.
                           </p>
                           <p class="mb-2">
                             Terdapat 2 tahapan, yang pertama pengisian tes dan yang kedua verifikasi jawaban dengan psikolog melalui Video Call.
@@ -121,7 +161,6 @@ function loading() {
                         </div>
                       </div>
                     </div>
-
                     <div
                       class="mt-4 text-center form-group"
                     >

@@ -20,16 +20,8 @@ export default {
           psychologists: [],
           consult: null,
       },
-
-      isTestSubmitted: false,
-      isTestNull: true,
-      isScheduleNull: true,
-      isTestFinished: false,
       isLoading: false,
-      isScheduleToday: false,
-
       haveRelation: false,
-
       haveConsult: false,
       isConsultToday: false,
       isLinkNull: true,
@@ -42,7 +34,7 @@ export default {
       return this.$store ? this.$store.state.notification : null;
     },
   },
-  beforeMount: async function(){
+  mounted: async function(){
     this.isLoading = true;
     await this.getDashboard();
     this.isLoading = false;
@@ -51,14 +43,16 @@ export default {
     ...notificationMethods,
 
     async getDashboard(){
+        loading();
         return (
-          api.getDashboard(this.user.id)
+          api.getConsultDashboard(this.user.id)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
                 if(response.data.data){
                     this.dashboard = response.data.data;
                     this.setDashboard();
                 }
+                loading();
             })
             .catch(error => {
               loading();
@@ -68,43 +62,6 @@ export default {
 
     setDashboard(){
         if(this.dashboard){
-            if(this.dashboard.test == null){
-                this.isTestSubmitted = false;
-                this.isTestNull = true;
-            }
-            else{
-                this.isTestNull = false;
-                if(this.dashboard.test.is_finished){
-                    this.isTestFinished = true;
-                }
-                else{
-                    this.isTestFinished = false;
-                }
-                if(this.dashboard.test.videocall_date && this.dashboard.test.videocall_link){
-                    this.isScheduleNull = false;
-                }
-                else{
-                    this.isScheduleNull = true;
-                }
-
-                let next_date = this.dashboard.test.next_date
-                if(moment().format('L') < moment(next_date).format('L')){
-                    this.isTestSubmitted = true;
-                }
-                else{
-                    this.isTestSubmitted = false;
-                }
-
-                if(this.dashboard.test.videocall_date){
-                  moment(this.formatDate(moment(), 'tanggal'))
-                    .isSameOrAfter(this.formatDate(this.dashboard.test.videocall_date, 'tanggal')) 
-                    ? this.isScheduleToday = true : this.isScheduleToday = false
-                }
-                else{
-                  this.isScheduleToday = false;
-                }
-            }
-
             if(this.dashboard.relation){
               this.haveRelation = true;
             }
@@ -136,18 +93,10 @@ export default {
         }
     },
 
-    onPDS5AnswerButtonClick(){
-        let id = this.dashboard.test.id
-        this.$router.push({
-          name: 'pds5-answer', 
-          params: { test_id: id }
-      });
-    },
-
-    onPDS5TestButtonClick(){
-      this.$router.push({
-          name: 'pds5-landing'
-      });
+    async refreshData(){
+      this.isLoading = true;
+      await this.getDashboard();
+      this.isLoading = false;
     },
 
     onProfileButtonClick(data){
@@ -225,12 +174,6 @@ export default {
       else{
         return null;
       }
-    },
-
-    onJournalButtonClick(){
-      this.$router.push({
-          name: 'journal'
-      });
     },
 
     formatDate(date, format){

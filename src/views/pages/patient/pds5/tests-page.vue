@@ -13,6 +13,8 @@ export default {
   },
   data() {
     return {
+        test_type: this.$route.params.test_type,
+
         patient_id: store.getters.getLoggedUser.profile.id,
         pageNumber: 1,
         testData: tests,
@@ -142,8 +144,47 @@ export default {
       }
     },
   },
+  mounted() {
+    this.checkAuth();
+  },
   methods: {
     ...notificationMethods,
+
+    getRequestParams(test_type) {
+      let params = {};
+
+      if (test_type) {
+        params["test_type"] = test_type;
+      }
+
+      return params;
+    },
+
+    checkAuth(){
+        loading();
+        const params = this.getRequestParams(
+            this.test_type,
+        );
+        return api.getTestTypes(params)
+            // eslint-disable-next-line no-unused-vars
+            .then(response => {
+                if(response.data.data.length > 0){
+                    this.test = response.data.data[0]
+                }
+                else{
+                    this.$router.replace({
+                        name: 'error-404'
+                    });
+                }
+                loading();
+            })
+            .catch(error => {
+                loading();
+                this.$router.replace({
+                    name: 'error-404'
+                });
+            })
+    },
 
     onCancelButtonClick(){
       Swal.fire({
@@ -337,12 +378,16 @@ export default {
       let data = {
         patient_id: this.patient_id,
         data_input: this.data_input,
+        test_type: this.test_type
       }
       return (
           api.inputTest(data)
             .then(response => {
                 Swal.fire("Tes telah berakhir!", "Jawaban Anda berhasil disimpan.", "success");
-                this.$router.replace({name: 'pds5-finished'});
+                this.$router.replace({
+                    name: 'test-finished', 
+                    params: { test_type: this.test_type }
+                });
             })
             .catch(error => {
                 //pop up
@@ -430,760 +475,701 @@ function loading() {
 
 <template>
   <div
-    style="background-color: #005C9A; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; overflow-x: hidden;"
+    class="p-2 mt-4"
   >
     <div
-      id="loading"
-      style="display:none; z-index:100; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+      v-if="pageNumber==1"
+      style="max-width:660px;"
     >
-      <b-spinner
-        style="width: 3rem; height: 3rem;"
-        class="m-2"
-        variant="warning"
-        role="status"
-      />
+      <div>
+        <h4
+          class="font-size-18"
+          style="font-weight: bold; text-decoration: underline;"
+        >
+          {{ testData.trauma.title }}
+        </h4>
+        <p>
+          1/2
+        </p>
+      </div>
+
+      <div
+        class="text-left"
+        style="color:black;"
+      >
+        <p>
+          {{ testData.trauma.questions[0] }}<br><b>(Pilih salah satu atau lebih)</b>
+        </p>
+        <div
+          v-for="(answer, index) in testData.trauma.answers"
+          :key="index"
+          class="mt-4"
+        >
+          <input
+            v-model="data_trauma.data1"
+            type="checkbox"
+            name="answer_text"
+            :value="answer"
+            style="vertical-align: middle; float: left; margin-top:5px;"
+            @change="onSelectedTrauma"
+          >
+          <div style="margin-left: 25px;">
+            {{ answer }}
+          </div>
+        </div>
+        <div class="mt-4">
+          <input
+            v-model="data_trauma.data1"
+            type="checkbox"
+            name="answer_text"
+            value="lain"
+            style="vertical-align: middle; float: left; margin-top:5px;"
+            @change="onSelectedTrauma"
+          >
+          <div style="margin-left: 25px;">
+            Trauma lainnya (Harap dijelaskan dengan ringkas):
+          </div>
+          <div
+            class="mb-4 mt-2"
+            style="display: flex;"
+          >
+            <input
+              id="a"
+              type="checkbox"
+              name="a"
+              value="a"
+              style="vertical-align: middle; float: left; margin-top:5px; visibility: hidden;"
+            >
+            <div style="width:100%; margin-left: 12px;">
+              <textarea 
+                v-model="data_trauma_lain.data1"
+                rows="4"
+                type="text"
+                class="form-control"
+                :disabled="!isTraumaLainSelected"
+                :style="form_style"
+                :class="{ 'is-invalid': submitted_trauma1 && isTraumaLainSelected && $v.data_trauma_lain.data1.$error }"
+              />
+              <div 
+                v-if="submitted_trauma1 && isTraumaLainSelected && !$v.data_trauma_lain.data1.required" 
+                class="invalid-feedback"
+              >
+                Penjelasan trauma harus diisi!
+              </div>
+            </div>
+          </div>
+        </div>
+        <input
+          v-model="data_trauma.data1"
+          type="checkbox"
+          name="answer_text"
+          value="none"
+          style="vertical-align: middle; float: left; margin-top:5px;"
+          @change="onSelectedTrauma"
+        >
+        <div style="margin-left: 25px;">
+          Tidak ada
+        </div>
+        <div>
+          <input
+            id="a"
+            type="checkbox"
+            name="a"
+            value="a"
+            style="vertical-align: middle; float: left; margin-top:5px; visibility: hidden;"
+          >
+          <div style="margin-left: 25px;">
+            *** jika <b>TIDAK ADA</b>, tes ini tidak akan dilanjutkan ***
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="mt-4 text-center form-group"
+        :class="{ 'is-invalid': submitted_trauma1 && $v.data_trauma.data1.$error }"
+      >
+        <button
+          class="btn btn-danger w-md waves-effect waves-light m-1"
+          style="width:180px"
+          @click="onCancelButtonClick()"
+        >
+          Batalkan
+        </button>
+        <button
+          class="btn btn-primary w-md waves-effect waves-light m-1"
+          style="background-color:#005C9A; width:260px"
+          @click="onNextButtonClick(2, true)"
+        >
+          Berikutnya
+        </button>
+      </div>
+      <div 
+        v-if="submitted_trauma1 && !$v.data_trauma.data1.required" 
+        class="invalid-feedback"
+        style="font-size:18px"
+      >
+        Harap pilih minimal satu pilihan!
+      </div>
     </div>
     <div
-      style="min-height: 100vh; display: flex; background-color: #005C9A;"
+      v-if="pageNumber==2"
+      style="max-width:660px;"
     >
-      <div
-        class="card h-100 m-5"
-        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
-      >
-        <div class="card-body">
-          <div class="text-center form-group mb-0">
-            <div
-              class="mr-5 ml-5 mt-2 mb-2"
-              style="flex-direction: column;"
-            >
-              <div>
-                <div class="text-center">
-                  <div class="row justify-content-center">
-                    <img
-                      src="@/assets/logo-mini.png"
-                      height="80"
-                      alt="logo"
-                    >
-                    <div class="ml-3 mt-3 text-left">
-                      <h4
-                        class="font-size-24"
-                        style="margin-bottom:0!important; text-weight: bold;"
-                      >
-                        Tes Penilaian Diri PTSD
-                      </h4>
-                      <p
-                        class="font-size-20 mt-0"
-                        style="font-weight: normal;"
-                      >
-                        PDS-5
-                      </p>
-                    </div>
-                  </div>
-                </div>
+      <div>
+        <h4
+          class="font-size-18"
+          style="font-weight: bold; text-decoration: underline;"
+        >
+          {{ testData.trauma.title }}
+        </h4>
+        <p>
+          2/2
+        </p>
+      </div>
 
+      <div
+        class="text-left"
+        style="color:black;"
+      >
+        <p>
+          {{ testData.trauma.questions[1] }}<br><b>(Pilih salah satu)</b>
+        </p>
+        <div
+          v-for="(answer, index) in testData.trauma.answers"
+          :key="index"
+          class="mt-4"
+        >
+          <input
+            v-model="data_trauma.data2"
+            type="radio"
+            name="answer_text"
+            :value="answer"
+            style="vertical-align: middle; float: left; margin-top:5px;"
+            @change="onSelectedTrauma2"
+          >
+          <div style="margin-left: 25px;">
+            {{ answer }}
+          </div>
+        </div>
+        <div class="mt-4">
+          <input
+            v-model="data_trauma.data2"
+            type="radio"
+            name="answer_text"
+            value="lain"
+            style="vertical-align: middle; float: left; margin-top: 5px;"
+            @change="onSelectedTrauma2"
+          >
+          <div style="margin-left: 25px;">
+            Trauma lainnya (Harap dijelaskan dengan ringkas):
+          </div>
+          <div
+            class="mb-4 mt-2"
+            style="display: flex;"
+          >
+            <input
+              id="a"
+              type="checkbox"
+              name="a"
+              value="a"
+              style="vertical-align: middle; float: left; margin-top: 5px; visibility: hidden;"
+            >
+            <div style="width:100%; margin-left: 12px;">
+              <textarea 
+                v-model="data_trauma_lain.data2"
+                rows="4"
+                type="text"
+                class="form-control"
+                :disabled="!isTraumaLainSelected2"
+                :style="form_style2"
+                :class="{ 'is-invalid': submitted_trauma2 && isTraumaLainSelected2 && $v.data_trauma_lain.data2.$error }"
+              />
+              <div 
+                v-if="submitted_trauma2 && isTraumaLainSelected2 && !$v.data_trauma_lain.data2.required" 
+                class="invalid-feedback"
+              >
+                Penjelasan trauma harus diisi!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="mt-4 text-center form-group"
+        :class="{ 'is-invalid': submitted_trauma2 && $v.data_trauma.data2.$error }"
+      >
+        <button
+          class="btn btn-secondary w-md waves-effect waves-light m-1"
+          style="width:180px"
+          @click="onNextButtonClick(1, false)"
+        >
+          Sebelumnya
+        </button>
+        <button
+          class="btn btn-primary w-md waves-effect waves-light m-1"
+          style="background-color:#005C9A; width:260px"
+          @click="onNextButtonClick(3, true)"
+        >
+          Berikutnya
+        </button>
+      </div>
+      <div 
+        v-if="submitted_trauma2 && !$v.data_trauma.data2.required" 
+        class="invalid-feedback"
+        style="font-size:18px"
+      >
+        Harap pilih satu pilihan!
+      </div>
+    </div>
+    <div
+      v-if="pageNumber==3"
+      style="max-width:820px;"
+    >
+      <div class="mb-4">
+        <h4
+          class="font-size-18"
+          style="font-weight: bold; text-decoration: underline;"
+        >
+          {{ testData.diagnosa.title[0] }}
+        </h4>
+        <p>
+          1/2
+        </p>
+      </div>
+
+      <div
+        class="text-left"
+        style="color:black;"
+      >
+        <div
+          class="card h-100 mb-2"
+          style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
+        >
+          <div
+            class="card-body"
+            style="min-width:260px; justify-content: center; max-width:880px; margin: auto;"
+          >
+            <p>
+              {{ textData.diagnosa[0] }}
+            </p>
+            <p>{{ textData.diagnosa[1] }}<br><b>{{ trauma_selected }}</b></p>
+            <p>{{ textData.diagnosa[2] }}</p>
+          </div>
+        </div>
+
+        <div
+          class="card h-100 mb-5"
+          style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
+        >
+          <div
+            class="card-body"
+            style="min-width:260px; justify-content: center; max-width:900px; margin: auto;"
+          >
+            <p>
+              {{ textData.diagnosa[3] }}<br>{{ textData.diagnosa[4] }}
+            </p>
+
+            <div class="mt-4">
+              <div style="display: flex;">
+                <label
+                  style="min-width:26px; float: left;"
+                  class="mr-2"
+                >0.</label>
+                <label>{{ textData.diagnosa[5] }}</label>
+              </div>
+              <div
+                class="row mb-4 mt-2"
+                style="display: flex; justify-content: center;"
+              >
                 <div
-                  class="p-2 mt-4"
+                  v-for="(answer, index_answer) in answers_diagnosa"
+                  :key="index_answer"
+                  class="m-2"
+                  style="justify-content: center; flex-direction: column;"
                 >
                   <div
-                    v-if="pageNumber==1"
-                    style="max-width:660px;"
+                    class="text-center"
+                    style="display: flex; justify-content: center;"
                   >
-                    <div>
-                      <h4
-                        class="font-size-18"
-                        style="font-weight: bold; text-decoration: underline;"
-                      >
-                        {{ testData.trauma.title }}
-                      </h4>
-                      <p>
-                        1/2
-                      </p>
-                    </div>
-
-                    <div
-                      class="text-left"
-                      style="color:black;"
+                    <input
+                      v-model="data_example"
+                      type="radio"
+                      :value="answer.value"
+                      disabled="true"
+                      style="vertical-align: middle; float: left; margin-top:5px;"
                     >
-                      <p>
-                        {{ testData.trauma.questions[0] }}<br><b>(Pilih salah satu atau lebih)</b>
-                      </p>
-                      <div
-                        v-for="(answer, index) in testData.trauma.answers"
-                        :key="index"
-                        class="mt-4"
-                      >
-                        <input
-                          v-model="data_trauma.data1"
-                          type="checkbox"
-                          name="answer_text"
-                          :value="answer"
-                          style="vertical-align: middle; float: left; margin-top:5px;"
-                          @change="onSelectedTrauma"
-                        >
-                        <div style="margin-left: 25px;">
-                          {{ answer }}
-                        </div>
-                      </div>
-                      <div class="mt-4">
-                        <input
-                          v-model="data_trauma.data1"
-                          type="checkbox"
-                          name="answer_text"
-                          value="lain"
-                          style="vertical-align: middle; float: left; margin-top:5px;"
-                          @change="onSelectedTrauma"
-                        >
-                        <div style="margin-left: 25px;">
-                          Trauma lainnya (Harap dijelaskan dengan ringkas):
-                        </div>
-                        <div
-                          class="mb-4 mt-2"
-                          style="display: flex;"
-                        >
-                          <input
-                            id="a"
-                            type="checkbox"
-                            name="a"
-                            value="a"
-                            style="vertical-align: middle; float: left; margin-top:5px; visibility: hidden;"
-                          >
-                          <div style="width:100%; margin-left: 12px;">
-                            <textarea 
-                              v-model="data_trauma_lain.data1"
-                              rows="4"
-                              type="text"
-                              class="form-control"
-                              :disabled="!isTraumaLainSelected"
-                              :style="form_style"
-                              :class="{ 'is-invalid': submitted_trauma1 && isTraumaLainSelected && $v.data_trauma_lain.data1.$error }"
-                            />
-                            <div 
-                              v-if="submitted_trauma1 && isTraumaLainSelected && !$v.data_trauma_lain.data1.required" 
-                              class="invalid-feedback"
-                            >
-                              Penjelasan trauma harus diisi!
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <input
-                        v-model="data_trauma.data1"
-                        type="checkbox"
-                        name="answer_text"
-                        value="none"
-                        style="vertical-align: middle; float: left; margin-top:5px;"
-                        @change="onSelectedTrauma"
-                      >
-                      <div style="margin-left: 25px;">
-                        Tidak ada
-                      </div>
-                      <div>
-                        <input
-                          id="a"
-                          type="checkbox"
-                          name="a"
-                          value="a"
-                          style="vertical-align: middle; float: left; margin-top:5px; visibility: hidden;"
-                        >
-                        <div style="margin-left: 25px;">
-                          *** jika <b>TIDAK ADA</b>, tes ini tidak akan dilanjutkan ***
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      class="mt-4 text-center form-group"
-                      :class="{ 'is-invalid': submitted_trauma1 && $v.data_trauma.data1.$error }"
-                    >
-                      <button
-                        class="btn btn-danger w-md waves-effect waves-light m-1"
-                        style="width:180px"
-                        @click="onCancelButtonClick()"
-                      >
-                        Batalkan
-                      </button>
-                      <button
-                        class="btn btn-primary w-md waves-effect waves-light m-1"
-                        style="background-color:#005C9A; width:260px"
-                        @click="onNextButtonClick(2, true)"
-                      >
-                        Berikutnya
-                      </button>
-                    </div>
-                    <div 
-                      v-if="submitted_trauma1 && !$v.data_trauma.data1.required" 
-                      class="invalid-feedback"
-                      style="font-size:18px"
-                    >
-                      Harap pilih minimal satu pilihan!
-                    </div>
+                    <label style="margin-left: 15px;">{{ answer.value }}</label>
                   </div>
-                  <div
-                    v-if="pageNumber==2"
-                    style="max-width:660px;"
+                  <p
+                    class="text-center"
+                    style="max-width:150px"
                   >
-                    <div>
-                      <h4
-                        class="font-size-18"
-                        style="font-weight: bold; text-decoration: underline;"
-                      >
-                        {{ testData.trauma.title }}
-                      </h4>
-                      <p>
-                        2/2
-                      </p>
-                    </div>
-
-                    <div
-                      class="text-left"
-                      style="color:black;"
-                    >
-                      <p>
-                        {{ testData.trauma.questions[1] }}<br><b>(Pilih salah satu)</b>
-                      </p>
-                      <div
-                        v-for="(answer, index) in testData.trauma.answers"
-                        :key="index"
-                        class="mt-4"
-                      >
-                        <input
-                          v-model="data_trauma.data2"
-                          type="radio"
-                          name="answer_text"
-                          :value="answer"
-                          style="vertical-align: middle; float: left; margin-top:5px;"
-                          @change="onSelectedTrauma2"
-                        >
-                        <div style="margin-left: 25px;">
-                          {{ answer }}
-                        </div>
-                      </div>
-                      <div class="mt-4">
-                        <input
-                          v-model="data_trauma.data2"
-                          type="radio"
-                          name="answer_text"
-                          value="lain"
-                          style="vertical-align: middle; float: left; margin-top: 5px;"
-                          @change="onSelectedTrauma2"
-                        >
-                        <div style="margin-left: 25px;">
-                          Trauma lainnya (Harap dijelaskan dengan ringkas):
-                        </div>
-                        <div
-                          class="mb-4 mt-2"
-                          style="display: flex;"
-                        >
-                          <input
-                            id="a"
-                            type="checkbox"
-                            name="a"
-                            value="a"
-                            style="vertical-align: middle; float: left; margin-top: 5px; visibility: hidden;"
-                          >
-                          <div style="width:100%; margin-left: 12px;">
-                            <textarea 
-                              v-model="data_trauma_lain.data2"
-                              rows="4"
-                              type="text"
-                              class="form-control"
-                              :disabled="!isTraumaLainSelected2"
-                              :style="form_style2"
-                              :class="{ 'is-invalid': submitted_trauma2 && isTraumaLainSelected2 && $v.data_trauma_lain.data2.$error }"
-                            />
-                            <div 
-                              v-if="submitted_trauma2 && isTraumaLainSelected2 && !$v.data_trauma_lain.data2.required" 
-                              class="invalid-feedback"
-                            >
-                              Penjelasan trauma harus diisi!
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      class="mt-4 text-center form-group"
-                      :class="{ 'is-invalid': submitted_trauma2 && $v.data_trauma.data2.$error }"
-                    >
-                      <button
-                        class="btn btn-secondary w-md waves-effect waves-light m-1"
-                        style="width:180px"
-                        @click="onNextButtonClick(1, false)"
-                      >
-                        Sebelumnya
-                      </button>
-                      <button
-                        class="btn btn-primary w-md waves-effect waves-light m-1"
-                        style="background-color:#005C9A; width:260px"
-                        @click="onNextButtonClick(3, true)"
-                      >
-                        Berikutnya
-                      </button>
-                    </div>
-                    <div 
-                      v-if="submitted_trauma2 && !$v.data_trauma.data2.required" 
-                      class="invalid-feedback"
-                      style="font-size:18px"
-                    >
-                      Harap pilih satu pilihan!
-                    </div>
-                  </div>
-                  <div
-                    v-if="pageNumber==3"
-                    style="max-width:820px;"
-                  >
-                    <div class="mb-4">
-                      <h4
-                        class="font-size-18"
-                        style="font-weight: bold; text-decoration: underline;"
-                      >
-                        {{ testData.diagnosa.title[0] }}
-                      </h4>
-                      <p>
-                        1/2
-                      </p>
-                    </div>
-
-                    <div
-                      class="text-left"
-                      style="color:black;"
-                    >
-                      <div
-                        class="card h-100 mb-2"
-                        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
-                      >
-                        <div
-                          class="card-body"
-                          style="min-width:260px; justify-content: center; max-width:880px; margin: auto;"
-                        >
-                          <p>
-                            {{ textData.diagnosa[0] }}
-                          </p>
-                          <p>{{ textData.diagnosa[1] }}<br><b>{{ trauma_selected }}</b></p>
-                          <p>{{ textData.diagnosa[2] }}</p>
-                        </div>
-                      </div>
-
-                      <div
-                        class="card h-100 mb-5"
-                        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
-                      >
-                        <div
-                          class="card-body"
-                          style="min-width:260px; justify-content: center; max-width:900px; margin: auto;"
-                        >
-                          <p>
-                            {{ textData.diagnosa[3] }}<br>{{ textData.diagnosa[4] }}
-                          </p>
-
-                          <div class="mt-4">
-                            <div style="display: flex;">
-                              <label
-                                style="min-width:26px; float: left;"
-                                class="mr-2"
-                              >0.</label>
-                              <label>{{ textData.diagnosa[5] }}</label>
-                            </div>
-                            <div
-                              class="row mb-4 mt-2"
-                              style="display: flex; justify-content: center;"
-                            >
-                              <div
-                                v-for="(answer, index_answer) in answers_diagnosa"
-                                :key="index_answer"
-                                class="m-2"
-                                style="justify-content: center; flex-direction: column;"
-                              >
-                                <div
-                                  class="text-center"
-                                  style="display: flex; justify-content: center;"
-                                >
-                                  <input
-                                    v-model="data_example"
-                                    type="radio"
-                                    :value="answer.value"
-                                    disabled="true"
-                                    style="vertical-align: middle; float: left; margin-top:5px;"
-                                  >
-                                  <label style="margin-left: 15px;">{{ answer.value }}</label>
-                                </div>
-                                <p
-                                  class="text-center"
-                                  style="max-width:150px"
-                                >
-                                  {{ answer.text }}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="mb-4 text-center">
-                        <p style="color:#5E6A75">
-                          1-10 kesulitan dalam sebulan terakhir
-                        </p>
-                      </div>
-
-                      <div
-                        v-for="(question, index) in testData.diagnosa.questions[0]"
-                        :key="index"
-                        class="mt-4"
-                        :set="v = $v.data_diagnosa.data1.$each[index]"
-                      >
-                        <div style="display: flex;">
-                          <label
-                            style="min-width:26px; float: left;"
-                            class="mr-2"
-                          >{{ index+1 }}.</label>
-                          <label>{{ question }}</label>
-                        </div>
-                        <div
-                          class="row mb-4 mt-2"
-                          style="display: flex; justify-content: center;"
-                          :class="{ 'is-invalid': submitted_diagnosa1 && v.answer.$error }"
-                        >
-                          <div
-                            v-for="(answer, index_answer) in answers_diagnosa"
-                            :key="index_answer"
-                            class="m-2"
-                            style="justify-content: center; flex-direction: column;"
-                          >
-                            <div
-                              class="text-center"
-                              style="display: flex; justify-content: center;"
-                            >
-                              <input
-                                v-model="data_diagnosa.data1[index].answer"
-                                type="radio"
-                                :value="answer.value"
-                                style="vertical-align: middle; float: left; margin-top:5px;"
-                              >
-                              <label style="margin-left: 15px;">{{ answer.value }}</label>
-                            </div>
-                            <p
-                              class="text-center"
-                              style="max-width:150px"
-                            >
-                              {{ answer.text }}
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          v-if="submitted_diagnosa1 && !v.answer.$error.required"
-                          class="invalid-feedback"
-                        >
-                          Jawaban harus dipilih!
-                        </div>
-                        <hr>
-                      </div>
-                    </div>
-
-                    <div
-                      class="mt-4 text-center form-group"
-                      :class="{ 'is-invalid': submitted_diagnosa1 && $v.data_diagnosa.data1.$invalid }"
-                    >
-                      <button
-                        class="btn btn-secondary w-md waves-effect waves-light m-1"
-                        style="width:180px"
-                        @click="onNextButtonClick(2, false)"
-                      >
-                        Sebelumnya
-                      </button>
-                      <button
-                        class="btn btn-primary w-md waves-effect waves-light m-1"
-                        style="background-color:#005C9A; width:260px"
-                        @click="onNextButtonClick(4, true)"
-                      >
-                        Berikutnya
-                      </button>
-                    </div>
-                    <div 
-                      v-if="submitted_diagnosa1 && $v.data_diagnosa.data1.$invalid" 
-                      class="invalid-feedback"
-                      style="font-size:18px"
-                    >
-                      Harap menjawab semua pertanyaan!
-                    </div>
-                  </div>
-                  <div
-                    v-if="pageNumber==4"
-                    style="max-width:820px;"
-                  >
-                    <div class="mb-4">
-                      <h4
-                        class="font-size-18"
-                        style="font-weight: bold; text-decoration: underline;"
-                      >
-                        {{ testData.diagnosa.title[0] }}
-                      </h4>
-                      <p>
-                        2/2
-                      </p>
-                    </div>
-
-                    <div
-                      class="text-left"
-                      style="color:black;"
-                    >
-                      <div class="mb-4 text-center">
-                        <p style="color:#5E6A75">
-                          11-20 kesulitan dalam sebulan terakhir
-                        </p>
-                      </div>
-
-                      <div
-                        v-for="(question, index) in testData.diagnosa.questions[1]"
-                        :key="index"
-                        class="mt-4"
-                        :set="v = $v.data_diagnosa.data2.$each[index]"
-                      >
-                        <div style="display: flex;">
-                          <label
-                            style="min-width:26px; float: left;"
-                            class="mr-2"
-                          >{{ index+11 }}.</label>
-                          <label>{{ question }}</label>
-                        </div>
-                        <div
-                          class="row mb-4 mt-2"
-                          style="display: flex; justify-content: center;"
-                          :class="{ 'is-invalid': submitted_diagnosa2 && v.answer.$error }"
-                        >
-                          <div
-                            v-for="(answer, index_answer) in answers_diagnosa"
-                            :key="index_answer"
-                            class="m-2"
-                            style="justify-content: center; flex-direction: column;"
-                          >
-                            <div
-                              class="text-center"
-                              style="display: flex; justify-content: center;"
-                            >
-                              <input
-                                v-model="data_diagnosa.data2[index].answer"
-                                type="radio"
-                                :value="answer.value"
-                                style="vertical-align: middle; float: left; margin-top:5px;"
-                              >
-                              <label style="margin-left: 15px;">{{ answer.value }}</label>
-                            </div>
-                            <p
-                              class="text-center"
-                              style="max-width:150px"
-                            >
-                              {{ answer.text }}
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          v-if="submitted_diagnosa2 && !v.answer.$error.required"
-                          class="invalid-feedback"
-                        >
-                          Jawaban harus dipilih!
-                        </div>
-                        <hr>
-                      </div>
-                    </div>
-
-                    <div
-                      class="mt-4 text-center form-group"
-                      :class="{ 'is-invalid': submitted_diagnosa2 && $v.data_diagnosa.data2.$invalid }"
-                    >
-                      <button
-                        class="btn btn-secondary w-md waves-effect waves-light m-1"
-                        style="width:180px"
-                        @click="onNextButtonClick(3, false)"
-                      >
-                        Sebelumnya
-                      </button>
-                      <button
-                        class="btn btn-primary w-md waves-effect waves-light m-1"
-                        style="background-color:#005C9A; width:260px"
-                        @click="onNextButtonClick(5, true)"
-                      >
-                        Berikutnya
-                      </button>
-                    </div>
-                    <div 
-                      v-if="submitted_diagnosa2 && $v.data_diagnosa.data2.$invalid" 
-                      class="invalid-feedback"
-                      style="font-size:18px"
-                    >
-                      Harap menjawab semua pertanyaan!
-                    </div>
-                  </div>
-                  <div
-                    v-if="pageNumber==5"
-                    style="max-width:820px;"
-                  >
-                    <div class="mb-4">
-                      <h4
-                        class="font-size-18"
-                        style="font-weight: bold; text-decoration: underline;"
-                      >
-                        {{ testData.diagnosa.title[1] }}
-                      </h4>
-                    </div>
-
-                    <div
-                      class="text-left mb-5"
-                      style="color:black;"
-                    >
-                      <div
-                        v-for="(question, index) in testData.diagnosa.questions[2]"
-                        :key="index"
-                        class="mt-4"
-                        :set="v = $v.data_diagnosa.data3.$each[index]"
-                      >
-                        <div style="display: flex;">
-                          <label
-                            style="min-width:26px; float: left;"
-                            class="mr-2"
-                          >{{ index+21 }}.</label>
-                          <label>{{ question }}</label>
-                        </div>
-                        <div
-                          class="row mb-4 mt-2"
-                          style="display: flex; justify-content: center;"
-                          :class="{ 'is-invalid': submitted_final && v.answer.$error }"
-                        >
-                          <div
-                            v-for="(answer, index_answer) in answers_diagnosa"
-                            :key="index_answer"
-                            class="m-2"
-                            style="justify-content: center; flex-direction: column;"
-                          >
-                            <div
-                              class="text-center"
-                              style="display: flex; justify-content: center;"
-                            >
-                              <input
-                                v-model="data_diagnosa.data3[index].answer"
-                                type="radio"
-                                :value="answer.value"
-                                style="vertical-align: middle; float: left; margin-top:5px;"
-                              >
-                              <label style="margin-left: 15px;">{{ answer.value }}</label>
-                            </div>
-                            <p
-                              class="text-center"
-                              style="max-width:150px"
-                            >
-                              {{ answer.text }}
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          v-if="submitted_final && !v.answer.$error.required"
-                          class="invalid-feedback"
-                        >
-                          Jawaban harus dipilih!
-                        </div>
-                        <hr>
-                      </div>
-                    </div>
-
-                    <div class="mb-4 mt-5">
-                      <h4
-                        class="font-size-18"
-                        style="font-weight: bold; text-decoration: underline;"
-                      >
-                        {{ testData.symptom.title }}
-                      </h4>
-                    </div>
-
-                    <div
-                      class="text-left"
-                      style="color:black;"
-                    >
-                      <div
-                        v-for="(question, index) in testData.symptom.questions"
-                        :key="index"
-                        class="mt-4"
-                        :set="v = $v.data_symptom.$each[index]"
-                      >
-                        <div style="display: flex;">
-                          <label
-                            style="min-width:26px; float: left;"
-                            class="mr-2"
-                          >{{ index+23 }}.</label>
-                          <label>{{ question }}</label>
-                        </div>
-                        <div
-                          class="row mb-4 mt-2"
-                          style="display: flex; justify-content: center;"
-                          :class="{ 'is-invalid': submitted_final && v.answer.$error }"
-                        >
-                          <div
-                            v-for="(answer, index_answer) in answers_symptom"
-                            :key="index_answer"
-                            class="m-2"
-                            style="justify-content: center; flex-direction: column;"
-                          >
-                            <div
-                              class="text-center"
-                              style="display: flex; justify-content: center;"
-                            >
-                              <input
-                                v-model="data_symptom[index].answer"
-                                type="radio"
-                                :value="answer.value"
-                                style="vertical-align: middle; float: left; margin-top:5px;"
-                              >
-                              <label style="margin-left: 15px;">{{ answer.value }}</label>
-                            </div>
-                            <p
-                              class="text-center"
-                              style="max-width:150px"
-                            >
-                              {{ answer.text }}
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          v-if="submitted_final && !v.answer.$error.required"
-                          class="invalid-feedback"
-                        >
-                          Jawaban harus dipilih!
-                        </div>
-                        <hr>
-                      </div>
-                    </div>
-
-                    <div
-                      class="mt-4 text-center form-group"
-                      :class="{ 'is-invalid': submitted_final && ($v.data_diagnosa.data3.$invalid || $v.data_symptom.$invalid) }"
-                    >
-                      <button
-                        class="btn btn-secondary w-md waves-effect waves-light m-1"
-                        style="width:180px"
-                        @click="onNextButtonClick(4, false)"
-                      >
-                        Sebelumnya
-                      </button>
-                      <button
-                        class="btn btn-success w-md waves-effect waves-light m-1"
-                        style="width:260px"
-                        @click="onFinishButtonClick()"
-                      >
-                        Selesai
-                      </button>
-                    </div>
-                    <div 
-                      v-if="submitted_final && ($v.data_diagnosa.data3.$invalid || $v.data_symptom.$invalid)" 
-                      class="invalid-feedback"
-                      style="font-size:18px"
-                    >
-                      Harap menjawab semua pertanyaan!
-                    </div>
-                  </div>
+                    {{ answer.text }}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div class="mb-4 text-center">
+          <p style="color:#5E6A75">
+            1-10 kesulitan dalam sebulan terakhir
+          </p>
+        </div>
+
+        <div
+          v-for="(question, index) in testData.diagnosa.questions[0]"
+          :key="index"
+          class="mt-4"
+          :set="v = $v.data_diagnosa.data1.$each[index]"
+        >
+          <div style="display: flex;">
+            <label
+              style="min-width:26px; float: left;"
+              class="mr-2"
+            >{{ index+1 }}.</label>
+            <label>{{ question }}</label>
+          </div>
+          <div
+            class="row mb-4 mt-2"
+            style="display: flex; justify-content: center;"
+            :class="{ 'is-invalid': submitted_diagnosa1 && v.answer.$error }"
+          >
+            <div
+              v-for="(answer, index_answer) in answers_diagnosa"
+              :key="index_answer"
+              class="m-2"
+              style="justify-content: center; flex-direction: column;"
+            >
+              <div
+                class="text-center"
+                style="display: flex; justify-content: center;"
+              >
+                <input
+                  v-model="data_diagnosa.data1[index].answer"
+                  type="radio"
+                  :value="answer.value"
+                  style="vertical-align: middle; float: left; margin-top:5px;"
+                >
+                <label style="margin-left: 15px;">{{ answer.value }}</label>
+              </div>
+              <p
+                class="text-center"
+                style="max-width:150px"
+              >
+                {{ answer.text }}
+              </p>
+            </div>
+          </div>
+          <div
+            v-if="submitted_diagnosa1 && !v.answer.$error.required"
+            class="invalid-feedback"
+          >
+            Jawaban harus dipilih!
+          </div>
+          <hr>
+        </div>
+      </div>
+
+      <div
+        class="mt-4 text-center form-group"
+        :class="{ 'is-invalid': submitted_diagnosa1 && $v.data_diagnosa.data1.$invalid }"
+      >
+        <button
+          class="btn btn-secondary w-md waves-effect waves-light m-1"
+          style="width:180px"
+          @click="onNextButtonClick(2, false)"
+        >
+          Sebelumnya
+        </button>
+        <button
+          class="btn btn-primary w-md waves-effect waves-light m-1"
+          style="background-color:#005C9A; width:260px"
+          @click="onNextButtonClick(4, true)"
+        >
+          Berikutnya
+        </button>
+      </div>
+      <div 
+        v-if="submitted_diagnosa1 && $v.data_diagnosa.data1.$invalid" 
+        class="invalid-feedback"
+        style="font-size:18px"
+      >
+        Harap menjawab semua pertanyaan!
+      </div>
+    </div>
+    <div
+      v-if="pageNumber==4"
+      style="max-width:820px;"
+    >
+      <div class="mb-4">
+        <h4
+          class="font-size-18"
+          style="font-weight: bold; text-decoration: underline;"
+        >
+          {{ testData.diagnosa.title[0] }}
+        </h4>
+        <p>
+          2/2
+        </p>
+      </div>
+
+      <div
+        class="text-left"
+        style="color:black;"
+      >
+        <div class="mb-4 text-center">
+          <p style="color:#5E6A75">
+            11-20 kesulitan dalam sebulan terakhir
+          </p>
+        </div>
+
+        <div
+          v-for="(question, index) in testData.diagnosa.questions[1]"
+          :key="index"
+          class="mt-4"
+          :set="v = $v.data_diagnosa.data2.$each[index]"
+        >
+          <div style="display: flex;">
+            <label
+              style="min-width:26px; float: left;"
+              class="mr-2"
+            >{{ index+11 }}.</label>
+            <label>{{ question }}</label>
+          </div>
+          <div
+            class="row mb-4 mt-2"
+            style="display: flex; justify-content: center;"
+            :class="{ 'is-invalid': submitted_diagnosa2 && v.answer.$error }"
+          >
+            <div
+              v-for="(answer, index_answer) in answers_diagnosa"
+              :key="index_answer"
+              class="m-2"
+              style="justify-content: center; flex-direction: column;"
+            >
+              <div
+                class="text-center"
+                style="display: flex; justify-content: center;"
+              >
+                <input
+                  v-model="data_diagnosa.data2[index].answer"
+                  type="radio"
+                  :value="answer.value"
+                  style="vertical-align: middle; float: left; margin-top:5px;"
+                >
+                <label style="margin-left: 15px;">{{ answer.value }}</label>
+              </div>
+              <p
+                class="text-center"
+                style="max-width:150px"
+              >
+                {{ answer.text }}
+              </p>
+            </div>
+          </div>
+          <div
+            v-if="submitted_diagnosa2 && !v.answer.$error.required"
+            class="invalid-feedback"
+          >
+            Jawaban harus dipilih!
+          </div>
+          <hr>
+        </div>
+      </div>
+
+      <div
+        class="mt-4 text-center form-group"
+        :class="{ 'is-invalid': submitted_diagnosa2 && $v.data_diagnosa.data2.$invalid }"
+      >
+        <button
+          class="btn btn-secondary w-md waves-effect waves-light m-1"
+          style="width:180px"
+          @click="onNextButtonClick(3, false)"
+        >
+          Sebelumnya
+        </button>
+        <button
+          class="btn btn-primary w-md waves-effect waves-light m-1"
+          style="background-color:#005C9A; width:260px"
+          @click="onNextButtonClick(5, true)"
+        >
+          Berikutnya
+        </button>
+      </div>
+      <div 
+        v-if="submitted_diagnosa2 && $v.data_diagnosa.data2.$invalid" 
+        class="invalid-feedback"
+        style="font-size:18px"
+      >
+        Harap menjawab semua pertanyaan!
+      </div>
+    </div>
+    <div
+      v-if="pageNumber==5"
+      style="max-width:820px;"
+    >
+      <div class="mb-4">
+        <h4
+          class="font-size-18"
+          style="font-weight: bold; text-decoration: underline;"
+        >
+          {{ testData.diagnosa.title[1] }}
+        </h4>
+      </div>
+
+      <div
+        class="text-left mb-5"
+        style="color:black;"
+      >
+        <div
+          v-for="(question, index) in testData.diagnosa.questions[2]"
+          :key="index"
+          class="mt-4"
+          :set="v = $v.data_diagnosa.data3.$each[index]"
+        >
+          <div style="display: flex;">
+            <label
+              style="min-width:26px; float: left;"
+              class="mr-2"
+            >{{ index+21 }}.</label>
+            <label>{{ question }}</label>
+          </div>
+          <div
+            class="row mb-4 mt-2"
+            style="display: flex; justify-content: center;"
+            :class="{ 'is-invalid': submitted_final && v.answer.$error }"
+          >
+            <div
+              v-for="(answer, index_answer) in answers_diagnosa"
+              :key="index_answer"
+              class="m-2"
+              style="justify-content: center; flex-direction: column;"
+            >
+              <div
+                class="text-center"
+                style="display: flex; justify-content: center;"
+              >
+                <input
+                  v-model="data_diagnosa.data3[index].answer"
+                  type="radio"
+                  :value="answer.value"
+                  style="vertical-align: middle; float: left; margin-top:5px;"
+                >
+                <label style="margin-left: 15px;">{{ answer.value }}</label>
+              </div>
+              <p
+                class="text-center"
+                style="max-width:150px"
+              >
+                {{ answer.text }}
+              </p>
+            </div>
+          </div>
+          <div
+            v-if="submitted_final && !v.answer.$error.required"
+            class="invalid-feedback"
+          >
+            Jawaban harus dipilih!
+          </div>
+          <hr>
+        </div>
+      </div>
+
+      <div class="mb-4 mt-5">
+        <h4
+          class="font-size-18"
+          style="font-weight: bold; text-decoration: underline;"
+        >
+          {{ testData.symptom.title }}
+        </h4>
+      </div>
+
+      <div
+        class="text-left"
+        style="color:black;"
+      >
+        <div
+          v-for="(question, index) in testData.symptom.questions"
+          :key="index"
+          class="mt-4"
+          :set="v = $v.data_symptom.$each[index]"
+        >
+          <div style="display: flex;">
+            <label
+              style="min-width:26px; float: left;"
+              class="mr-2"
+            >{{ index+23 }}.</label>
+            <label>{{ question }}</label>
+          </div>
+          <div
+            class="row mb-4 mt-2"
+            style="display: flex; justify-content: center;"
+            :class="{ 'is-invalid': submitted_final && v.answer.$error }"
+          >
+            <div
+              v-for="(answer, index_answer) in answers_symptom"
+              :key="index_answer"
+              class="m-2"
+              style="justify-content: center; flex-direction: column;"
+            >
+              <div
+                class="text-center"
+                style="display: flex; justify-content: center;"
+              >
+                <input
+                  v-model="data_symptom[index].answer"
+                  type="radio"
+                  :value="answer.value"
+                  style="vertical-align: middle; float: left; margin-top:5px;"
+                >
+                <label style="margin-left: 15px;">{{ answer.value }}</label>
+              </div>
+              <p
+                class="text-center"
+                style="max-width:150px"
+              >
+                {{ answer.text }}
+              </p>
+            </div>
+          </div>
+          <div
+            v-if="submitted_final && !v.answer.$error.required"
+            class="invalid-feedback"
+          >
+            Jawaban harus dipilih!
+          </div>
+          <hr>
+        </div>
+      </div>
+
+      <div
+        class="mt-4 text-center form-group"
+        :class="{ 'is-invalid': submitted_final && ($v.data_diagnosa.data3.$invalid || $v.data_symptom.$invalid) }"
+      >
+        <button
+          class="btn btn-secondary w-md waves-effect waves-light m-1"
+          style="width:180px"
+          @click="onNextButtonClick(4, false)"
+        >
+          Sebelumnya
+        </button>
+        <button
+          class="btn btn-success w-md waves-effect waves-light m-1"
+          style="width:260px"
+          @click="onFinishButtonClick()"
+        >
+          Selesai
+        </button>
+      </div>
+      <div 
+        v-if="submitted_final && ($v.data_diagnosa.data3.$invalid || $v.data_symptom.$invalid)" 
+        class="invalid-feedback"
+        style="font-size:18px"
+      >
+        Harap menjawab semua pertanyaan!
       </div>
     </div>
   </div>

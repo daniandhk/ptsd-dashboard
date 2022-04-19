@@ -24,9 +24,16 @@ export function inputGuardian(data){
     })
 }
 
-export function getDashboard(user_id){
+export function getTestDashboard(user_id){
     return httpAxios({
-        url: `/patient/dashboard/${user_id}`,
+        url: `/patient/test-dashboard/${user_id}`,
+        method: 'GET',
+    })
+}
+
+export function getConsultDashboard(user_id){
+    return httpAxios({
+        url: `/patient/consult-dashboard/${user_id}`,
         method: 'GET',
     })
 }
