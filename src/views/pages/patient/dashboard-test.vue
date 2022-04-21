@@ -143,7 +143,7 @@ export default {
     },
 
     isOnline(data){
-      if(data.chat_schedule.length != 0){
+      if(data.chat_schedule.length > 0){
         let today = this.formatDate(moment(), 'hari')
         data.chat_schedule.forEach((element, index, array) => {
             let hari = this.formatDate(element.day, 'hari')
@@ -159,7 +159,7 @@ export default {
     },
 
     getDate(data){
-      if(data.chat_schedule.length != 0){
+      if(data.chat_schedule.length > 0){
         let today = this.formatDate(moment(), 'hari')
         data.chat_schedule.forEach((element, index, array) => {
             let hari = this.formatDate(element.day, 'hari')
@@ -262,7 +262,10 @@ function loading() {
             </div>
           </div>
         </div>
-        <div class="col-lg-8 pl-2 pr-2">
+        <div
+          v-if="!isLoading"
+          class="col-lg-8 pl-2 pr-2"
+        >
           <div
             v-for="(test_type, index) in dashboard.test_types"
             :key="index"
@@ -288,10 +291,7 @@ function loading() {
                             border: 0 none; 
                             color: #eee;"
                   >
-                  <div
-                    v-if="!isLoading"
-                    style="color:black;"
-                  >
+                  <div style="color:black;">
                     <div>
                       <div v-if="isTestSubmitted[index] && !isTestFinished[index]">
                         <div class="mt-4 mb-2">
@@ -304,88 +304,124 @@ function loading() {
                         </div>
                         <div v-if="!isScheduleNull[index]">
                           <div
-                            class="row mt-3"
-                            style="display: flex; justify-content: center;"
+                            class="card h-100 mt-2"
+                            style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
                           >
-                            <div style="width:50%;">
-                              <div class="mb-2">
-                                Jadwal
-                              </div>
-                              <div style="font-weight:bold;">
-                                {{ formatDate(test_type.current_test.videocall_date, 'lengkap') }}
-                              </div>
-                            </div>
-                            <div style="width:50%;">
-                              <div>
-                                Tautan / Link
-                              </div>
-                              <div>
-                                <button 
-                                  type="button"
-                                  class="btn btn-primary m-1 btn-sm mr-2"
-                                  style="background-color:#005C9A; min-width:80%;"
-                                  :disabled="!isScheduleToday[index]"
-                                  @click.stop.prevent="onGoToLinkButtonClick(test_type.current_test.videocall_link)"
-                                >
-                                  Video Call
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="mt-5">
-                            Profil psikolog
-                          </div>
-                          <div
-                            class="card h-100 mt-2 card-psikolog"
-                            style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); cursor: pointer;"
-                            @click="onProfileButtonClick(dashboard.psychologists[0])"
-                          >
-                            <div
-                              class="card-body"
-                              style="padding:12px!important"
-                            >
+                            <div class="card-body">
                               <div
                                 class="row"
-                                style="display: flex; align-items: center; justify-content: center;"
+                                style="display: flex; justify-content: center;"
                               >
-                                <img
-                                  class="rounded-circle header-profile-user ml-2"
-                                  src="@/assets/images/users/default_profile.jpg"
-                                  alt="Header Avatar"
-                                >
-                                <div class="column text-left mr-5 ml-3">
-                                  <div style="font-weight:bold;">
-                                    {{ dashboard.psychologists[0].first_name + " " + dashboard.psychologists[0].last_name + " " + dashboard.psychologists[0].degree }}
+                                <div class="col-lg-6 p-2">
+                                  <div class="mb-2">
+                                    Jadwal
                                   </div>
-                                  <div class="font-size-12">
-                                    {{ dashboard.psychologists[0].str_number ? dashboard.psychologists[0].str_number : "No. STR" }}
+                                  <div
+                                    class="font-size-16"
+                                    style="font-weight:bold;"
+                                  >
+                                    {{ formatDate(test_type.current_test.videocall_date, 'lengkap') }}
                                   </div>
                                 </div>
-                                <button 
-                                  type="button"
-                                  class="btn btn-light m-1 btn-sm mr-2"
-                                  style="background-color:#2A82BD; min-width:20%; color:white;"
-                                  @click.stop.prevent="onGoToLinkButtonClick('chat')"
-                                >
-                                  Chat
-                                </button>
+                                <div class="col-lg-6 p-2">
+                                  <div>
+                                    Tautan / Link
+                                  </div>
+                                  <div>
+                                    <button 
+                                      type="button"
+                                      class="btn btn-primary m-1 btn-sm mr-2"
+                                      style="background-color:#005C9A; min-width:80%;"
+                                      :disabled="!isScheduleToday[index]"
+                                      @click.stop.prevent="onGoToLinkButtonClick(test_type.current_test.videocall_link)"
+                                    >
+                                      Video Call
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                          <hr
-                            style="margin-left: -28px; 
+                              <div class="mt-4">
+                                <hr
+                                  style="margin-left: -20px; 
+                                          margin-right: -20px; 
+                                          height: 2px; 
+                                          background-color: #eee; 
+                                          border: 0 none; 
+                                          color: #eee;"
+                                >
+                                <div
+                                  class="font-size-12"
+                                  style="color:grey;"
+                                >
+                                  Ubah jadwal? Silahkan kirim pesan ke psikolog!
+                                </div>
+                                <!-- <hr
+                              style="margin-left: -28px; 
                             margin-right: -28px; 
                             height: 2px; 
                             background-color: #eee; 
                             border: 0 none; 
                             color: #eee;"
-                          >
-                          <div
-                            class="font-size-12"
-                            style="color:grey;"
-                          >
-                            Ubah jadwal? Silahkan kirim pesan ke psikolog!
+                            > -->
+                              </div>
+                            </div>
                           </div>
+                          <!-- <div>
+                            <div class="mt-4 mb-2">
+                              Profil psikolog
+                            </div>
+                            <div
+                              class="row mt-4"
+                              style="display:flex; justify-content: center; align-items: center;"
+                            >
+                              <div class="col-xl-6 col-sm-12">
+                                <div
+                                  class="card"
+                                  style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); cursor: pointer;"
+                                  @click="onProfileButtonClick(dashboard.psychologist)"
+                                >
+                                  <div class="card-body">
+                                    <div class="text-center">
+                                      <img
+                                        :src="`${data.image}`"
+                                        alt
+                                        class="avatar-sm mt-2 mb-4"
+                                      >
+                                      <div class="media-body">
+                                        <h5 class="text-truncate">
+                                          <a
+                                            href="#"
+                                            class="text-dark"
+                                          >{{ dashboard.psychologist.full_name }}</a>
+                                        </h5>
+                                        <p class="text-muted">
+                                          <i class="mdi mdi-account mr-1" /> {{ dashboard.psychologist.speciality }}
+                                        </p>
+                                        <div>
+                                          <button 
+                                            type="button"
+                                            class="btn btn-success m-1 btn-sm"
+                                            style="min-width:40%;"
+                                            @click.stop.prevent="onGoToLinkButtonClick('chat')"
+                                          >
+                                            Chat
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div v-if="!isOnline(dashboard.psychologist)">
+                                      <hr class="my-4">
+                                      <div class="text-center">
+                                        <div class="font-size-12">
+                                          Online berikutnya: {{ getDate(dashboard.psychologist) ? getDate(dashboard.psychologist).day + ", " + getDate(dashboard.psychologist).time_start + "-" + getDate(dashboard.psychologist).time_end : "-" }}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div> -->
                         </div>
                       </div>
                       <div v-if="!isTestSubmitted[index] && (!isTestFinished[index] || isTestFinished[index])">

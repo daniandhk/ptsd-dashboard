@@ -56,6 +56,8 @@ export default {
         { key: "action", label: "Aksi", sortable: false, thClass: 'text-center', tdClass: 'text-center', }
       ],
 
+      isLoading: false,
+
     };
   },
   computed: {
@@ -67,7 +69,9 @@ export default {
     document.body.setAttribute("data-topbar", "dark");
   },
   mounted: async function(){
+    this.isLoading = true;
     await this.getDashboard(this.today);
+    this.isLoading = false;
   },
   methods: {
     ...notificationMethods,
@@ -140,7 +144,9 @@ export default {
     },
 
     async refreshData(){
+      this.isLoading = true;
       await this.getDashboard(this.today);
+      this.isLoading = false;
     },
 
     onSubmitAnswerButtonClick(data){
@@ -309,7 +315,10 @@ function loading() {
             </div>
           </div>
         </div>
-        <div class="col-lg-8 pl-2 pr-2">
+        <div
+          v-if="!isLoading"
+          class="col-lg-8 pl-2 pr-2"
+        >
           <div
             class="card"
             style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
@@ -405,7 +414,7 @@ function loading() {
                   <hr
                     style="margin-left: -28px; 
                             margin-right: -28px; 
-                            height: 2px; 
+                            height: 4px; 
                             background-color: #eee; 
                             border: 0 none; 
                             color: #eee;"

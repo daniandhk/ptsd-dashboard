@@ -62,19 +62,7 @@ export default {
                 });
             })
     },
-
-    onBackButtonClick(){
-      this.$router.push({
-          name: 'home'
-      });
-    },
-
-    onStartButtonClick(){
-      this.$router.replace({
-          name: 'test-start', 
-          params: { test_type: this.test_type }
-      });
-    },
+    
   }
 };
 function loading() {
@@ -103,8 +91,17 @@ function loading() {
       />
     </div>
     <div
-      style="min-height: 100vh; display: flex; background-color: #005C9A;"
+      class="row"
+      style="min-height: 100vh; display: flex; flex-direction: column; background-color: #005C9A;"
     >
+      <div
+        class="card h-100 m-5"
+        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
+      >
+        <div class="card-body">
+          //
+        </div>
+      </div>
       <div
         class="card h-100 m-5"
         style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"

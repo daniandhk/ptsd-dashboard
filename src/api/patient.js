@@ -31,11 +31,8 @@ export function getTestDashboard(user_id){
     })
 }
 
-export function getConsultDashboard(user_id){
-    return httpAxios({
-        url: `/patient/consult-dashboard/${user_id}`,
-        method: 'GET',
-    })
+export function getConsultDashboard(user_id, params){
+    return httpAxios.get(`/patient/consult-dashboard/${user_id}`, { params });
 }
 
 export function getJournalDashboard(user_id, params){

@@ -6,7 +6,7 @@ import Cookies from 'js-cookie'
 
 // Create
 const service = axios.create({
-    baseURL: process.env.VUE_APP_BACKEND_URL
+    baseURL: process.env.VUE_APP_BACKEND_URL + '/api'
 })
 
 // Token

@@ -351,7 +351,7 @@ export default {
       }
       else{
         this.data_diagnosa.data3.forEach((element, index, array) => {
-            this.createAnswerData("diagnosa", element.index, element.answer)
+            this.createAnswerData("distress", element.index, element.answer)
         });
 
         this.data_symptom.forEach((element, index, array) => {

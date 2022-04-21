@@ -28,7 +28,7 @@ const options = {
 }
 
 Vue.config.productionTip = false
-Vue.prototype.$backendUrl = process.env.VUE_APP_BACKEND_URL
+Vue.prototype.$backendUrl = process.env.VUE_APP_BACKEND_URL + '/api'
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 Vue.use(vco)

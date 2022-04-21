@@ -27,11 +27,23 @@ export default {
       isLinkNull: true,
 
       dataProfile: null,
+
+      totalRows: 1,
+      currentPage: 1,
+      perPage: 6,
+      pageOptions: [6, 12, 30, 50, 100],
+      filter: "",
+      filterOn: [],
+      isFetchingData: false,
     };
   },
   computed: {
     notification() {
       return this.$store ? this.$store.state.notification : null;
+    },
+
+    rows() {
+      return this.totalRows;
     },
   },
   mounted: async function(){
@@ -42,10 +54,33 @@ export default {
   methods: {
     ...notificationMethods,
 
+    getRequestParams(search, page, pageSize) {
+      let params = {};
+
+      if (search) {
+        params["search"] = search;
+      }
+
+      if (page) {
+        params["page"] = page;
+      }
+
+      if (pageSize) {
+        params["per_page"] = pageSize;
+      }
+
+      return params;
+    },
+
     async getDashboard(){
         loading();
+        const params = this.getRequestParams(
+            this.filter,
+            this.currentPage,
+            this.perPage,
+        );
         return (
-          api.getConsultDashboard(this.user.id)
+          api.getConsultDashboard(this.user.id, params)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
                 if(response.data.data){
@@ -62,11 +97,12 @@ export default {
 
     setDashboard(){
         if(this.dashboard){
-            if(this.dashboard.relation){
+            if(this.dashboard.psychologist){
               this.haveRelation = true;
             }
             else{
               this.haveRelation = false;
+              this.totalRows = this.dashboard.psychologists.total;
             }
 
             if(this.dashboard.consult){
@@ -91,6 +127,7 @@ export default {
               this.haveConsult = false;
             }
         }
+        console.log(this.haveRelation)
     },
 
     async refreshData(){
@@ -145,7 +182,7 @@ export default {
     },
 
     isOnline(data){
-      if(data.chat_schedule.length != 0){
+      if(data.chat_schedule.length > 0){
         let today = this.formatDate(moment(), 'hari')
         data.chat_schedule.forEach((element, index, array) => {
             let hari = this.formatDate(element.day, 'hari')
@@ -161,7 +198,7 @@ export default {
     },
 
     getDate(data){
-      if(data.chat_schedule.length != 0){
+      if(data.chat_schedule.length > 0){
         let today = this.formatDate(moment(), 'hari')
         data.chat_schedule.forEach((element, index, array) => {
             let hari = this.formatDate(element.day, 'hari')
@@ -177,17 +214,69 @@ export default {
     },
 
     formatDate(date, format){
-      if(format == 'tanggal'){
-        return moment(date).locale('id').format('DD MMMM YYYY')
+      if(date){
+        if(format == 'tanggal'){
+          return moment(date).locale('id').format('DD MMMM YYYY')
+        }
+        else if(format == 'lengkap'){
+          return moment(date).locale('id').format('LLLL')
+        }
+        else if(format == 'hari'){
+          return moment(date).locale('id').format('dddd')
+        }
+        else{
+          return moment(date).locale('id')
+        }
       }
-      if(format == 'lengkap'){
-        return moment(date).locale('id').format('LLLL')
+      else{
+        return "-"
       }
-      if(format == 'hari'){
-        return moment(date).locale('id').format('dddd')
+    },
+
+    async onSearchButtonClick(){
+      loading();
+      this.isFetchingData = true;
+
+      await this.getDashboard();
+
+      this.isFetchingData = false;
+      loading();
+    },
+
+    async handleSearch(value){
+      if(!value){
+        loading();
+        this.isFetchingData = true;
+
+        await this.getDashboard();
+
+        this.isFetchingData = false;
+        loading();
       }
-        
-    }
+    },
+
+    async handlePageChange(value) {
+      loading();
+      this.isFetchingData = true;
+
+      this.currentPage = value;
+      await this.getDashboard();
+
+      this.isFetchingData = false;
+      loading();
+    },
+
+    async handlePageSizeChange(value) {
+      loading();
+      this.isFetchingData = true;
+
+      this.perPage = value;
+      this.currentPage = 1;
+      await this.getDashboard();
+
+      this.isFetchingData = false;
+      loading();
+    },
 
     //
   },
@@ -245,198 +334,296 @@ function loading() {
             </div>
           </div>
         </div>
-        <div class="col-lg-8 pl-2 pr-2">
+        <div
+          v-if="!isLoading"
+          class="col-lg-8 pl-2 pr-2"
+        >
+          <div v-if="haveConsult">
+            <div
+              class="card"
+              style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
+            >
+              <div class="card-body mt-2 ml-2 mr-2">
+                <div class="text-center form-group mb-0">
+                  <div style="color:black;">
+                    <h5
+                      class="text-center font-size-15 text-uppercase"
+                      style="color:#005C9A;"
+                    >
+                      Konsultasi Video Call
+                    </h5>
+                    <hr
+                      style="margin-left: -28px; 
+                            margin-right: -28px; 
+                            height: 4px; 
+                            background-color: #eee; 
+                            border: 0 none; 
+                            color: #eee;"
+                    >
+                    <div v-if="isConsultToday">
+                      <div
+                        class="row mt-4 mb-4"
+                        style="display: flex; justify-content: center;"
+                      >
+                        <div style="width:50%;">
+                          <div class="mb-2">
+                            Konsultasi ke-{{ dashboard.consult.consult_index }}
+                          </div>
+                          <div style="font-weight:bold;">
+                            {{ formatDate(dashboard.consult.consult_info.videocall_date, 'lengkap') }}
+                          </div>
+                        </div>
+                        <div style="width:50%;">
+                          <div>
+                            Tautan / Link
+                          </div>
+                          <div>
+                            <button 
+                              type="button"
+                              class="btn btn-primary m-1 btn-sm mr-2"
+                              style="background-color:#005C9A; min-width:80%;"
+                              :disabled="!isConsultToday || isLinkNull"
+                              @click.stop.prevent="onGoToLinkButtonClick(dashboard.consult.consult_info.videocall_link)"
+                            >
+                              Video Call
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="!isConsultToday">
+                      <div
+                        class="row mt-4 mb-4"
+                        style="display: flex; justify-content: center;"
+                      >
+                        <div style="width:50%;">
+                          <div class="mb-2">
+                            Konsultasi terakhir
+                          </div>
+                          <div>
+                            {{ formatDate(dashboard.consult.last_date, 'tanggal') }}
+                          </div>
+                        </div>
+                        <div style="width:50%;">
+                          <div class="mb-2">
+                            Konsultasi ke-{{ dashboard.consult.consult_index }}
+                          </div>
+                          <div style="font-weight:bold;">
+                            {{ formatDate(dashboard.consult.next_date, 'lengkap') }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-5">
+                      <hr
+                        style="margin-left: -28px; 
+                            margin-right: -28px; 
+                            height: 2px; 
+                            background-color: #eee; 
+                            border: 0 none; 
+                            color: #eee;"
+                      >
+                      <div
+                        class="font-size-12"
+                        style="color:grey;"
+                      >
+                        Ubah jadwal? Silahkan kirim pesan ke psikolog!
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div
             class="card"
             style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
           >
             <div class="card-body mt-2 ml-2 mr-2">
               <div class="text-center form-group mb-0">
-                <div>
-                  <div
-                    v-if="!isLoading"
-                    style="color:black;"
-                  >
-                    <div v-if="haveRelation">
-                      <div v-if="haveConsult">
-                        <div v-if="isConsultToday">
-                          <div
-                            class="row mt-3"
-                            style="display: flex; justify-content: center;"
-                          >
-                            <div style="width:50%;">
-                              <div class="mb-2">
-                                Konsultasi ke-{{ dashboard.consult.consult_index }}
-                              </div>
-                              <div style="font-weight:bold;">
-                                {{ formatDate(dashboard.consult.consult_info.videocall_date, 'lengkap') }}
+                <div style="color:black;">
+                  <div v-if="haveRelation">
+                    <h5
+                      class="text-center font-size-15 text-uppercase"
+                      style="color:#005C9A;"
+                    >
+                      Profil Psikolog
+                    </h5>
+                    <hr
+                      style="margin-left: -28px; 
+                            margin-right: -28px; 
+                            height: 4px; 
+                            background-color: #eee; 
+                            border: 0 none; 
+                            color: #eee;"
+                    >
+                    <div
+                      class="row mt-4"
+                      style="display:flex; justify-content: center; align-items: center;"
+                    >
+                      <div class="col-xl-6 col-sm-12">
+                        <div
+                          class="card"
+                          style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); cursor: pointer;"
+                          @click="onProfileButtonClick(dashboard.psychologist)"
+                        >
+                          <div class="card-body">
+                            <div class="text-center">
+                              <!-- <img
+                                  :src="`${data.image}`"
+                                  alt
+                                  class="avatar-sm mt-2 mb-4"
+                                > -->
+                              <div class="media-body">
+                                <h5 class="text-truncate">
+                                  <a
+                                    href="#"
+                                    class="text-dark"
+                                  >{{ dashboard.psychologist.full_name }}</a>
+                                </h5>
+                                <p class="text-muted">
+                                  <i class="mdi mdi-account mr-1" /> {{ dashboard.psychologist.speciality }}
+                                </p>
+                                <div>
+                                  <button 
+                                    type="button"
+                                    class="btn btn-success m-1 btn-sm"
+                                    style="min-width:40%;"
+                                    @click.stop.prevent="onGoToLinkButtonClick('chat')"
+                                  >
+                                    Chat
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                            <div style="width:50%;">
-                              <div>
-                                Tautan / Link
-                              </div>
-                              <div>
-                                <button 
-                                  type="button"
-                                  class="btn btn-primary m-1 btn-sm mr-2"
-                                  style="background-color:#005C9A; min-width:80%;"
-                                  :disabled="!isConsultToday || isLinkNull"
-                                  @click.stop.prevent="onGoToLinkButtonClick(dashboard.consult.consult_info.videocall_link)"
-                                >
-                                  Video Call
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div v-if="!isConsultToday">
-                          <div
-                            class="row mt-3"
-                            style="display: flex; justify-content: center;"
-                          >
-                            <div style="width:50%;">
-                              <div class="mb-2">
-                                Konsultasi terakhir
-                              </div>
-                              <div>
-                                {{ formatDate(dashboard.consult.last_date, 'tanggal') }}
-                              </div>
-                            </div>
-                            <div style="width:50%;">
-                              <div class="mb-2">
-                                Konsultasi ke-{{ dashboard.consult.consult_index }}
-                              </div>
-                              <div style="font-weight:bold;">
-                                {{ formatDate(dashboard.consult.next_date, 'lengkap') }}
+                            <div v-if="!isOnline(dashboard.psychologist)">
+                              <hr class="my-4">
+                              <div class="text-center">
+                                <div class="font-size-12">
+                                  Online berikutnya: {{ getDate(dashboard.psychologist) ? getDate(dashboard.psychologist).day + ", " + getDate(dashboard.psychologist).time_start + "-" + getDate(dashboard.psychologist).time_end : "-" }}
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div>
-                        <div
-                          v-if="haveConsult"
-                          class="text-center mt-5"
-                        >
-                          Profil psikolog
-                        </div>
-                        <div
-                          v-if="!haveConsult"
-                          class="text-center mt-0"
-                        >
-                          Profil psikolog
-                        </div>
-                        <div
-                          class="card h-100 mt-2 card-psikolog"
-                          style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); cursor: pointer;"
-                          @click="onProfileButtonClick(dashboard.psychologists[0])"
-                        >
-                          <div
-                            class="card-body"
-                            style="padding:12px!important"
-                          >
-                            <div
-                              class="row"
-                              style="display: flex; align-items: center; justify-content: center;"
-                            >
-                              <img
-                                class="rounded-circle header-profile-user ml-2"
-                                src="@/assets/images/users/default_profile.jpg"
-                                alt="Header Avatar"
-                              >
-                              <div class="column text-left mr-5 ml-3">
-                                <div style="font-weight:bold;">
-                                  {{ dashboard.psychologists[0].first_name + " " + dashboard.psychologists[0].last_name + " " + dashboard.psychologists[0].degree }}
-                                </div>
-                                <div class="font-size-12">
-                                  {{ dashboard.psychologists[0].str_number ? dashboard.psychologists[0].str_number : "No. STR" }}
-                                </div>
-                              </div>
-                              <button 
-                                type="button"
-                                class="btn btn-light m-1 btn-sm mr-2"
-                                style="background-color:#2A82BD; min-width:20%; color:white;"
-                                @click.stop.prevent="onGoToLinkButtonClick('chat')"
-                              >
-                                Chat
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <hr
-                          style="margin-left: -28px; 
+                    </div>
+                    <div v-if="!haveConsult">
+                      <hr
+                        style="margin-left: -28px; 
                             margin-right: -28px; 
                             height: 2px; 
                             background-color: #eee; 
                             border: 0 none; 
                             color: #eee;"
-                        >
-                        <div
-                          v-if="haveConsult"
-                          class="font-size-12"
-                          style="color:grey;"
-                        >
-                          Ubah jadwal? Silahkan kirim pesan ke psikolog!
-                        </div>
-                        <div
-                          v-if="!haveConsult"
-                          class="font-size-12"
-                          style="color:grey;"
-                        >
-                          Butuh Video Call? Silahkan kirim pesan ke psikolog!
-                        </div>
+                      >
+                      <div
+                        class="font-size-12"
+                        style="color:grey;"
+                      >
+                        Butuh Video Call? Silahkan kirim pesan ke psikolog!
                       </div>
                     </div>
-                    <div v-if="!haveRelation">
-                      <h5
-                        class="text-center font-size-15 text-uppercase"
-                        style="color:#005C9A;"
-                      >
-                        Pilih Psikolog
-                      </h5>
+                  </div>
+                  <div v-if="!haveRelation">
+                    <h5
+                      class="text-center font-size-15 text-uppercase"
+                      style="color:#005C9A;"
+                    >
+                      Pilih Psikolog
+                    </h5>
+                    <hr
+                      style="margin-left: -28px; 
+                            margin-right: -28px; 
+                            height: 4px; 
+                            background-color: #eee; 
+                            border: 0 none; 
+                            color: #eee;"
+                    >
+                    <div class="row mt-4 ml-1 mr-1">
+                      <div class="col-sm-12 col-md-6">
+                        <div class="dataTables_length text-md-left">
+                          <label class="d-inline-flex align-items-center text-muted">
+                            Tampilkan
+                            <b-form-select 
+                              v-model="perPage" 
+                              size="sm" 
+                              :options="pageOptions"
+                              @change="handlePageSizeChange"
+                            />data
+                          </label>
+                        </div>
+                      </div>
+                      <!-- Search -->
+                      <div class="col-sm-12 col-md-6">
+                        <div class="dataTables_filter text-md-right">
+                          <label class="d-inline-flex align-items-center">
+                            <b-form-input
+                              v-model="filter"
+                              type="search"
+                              placeholder="Ketik nama"
+                              class="form-control form-control-sm mr-2"
+                              @input="handleSearch"
+                            />
+                            <b-button
+                              type="submit" 
+                              variant="outline-secondary"
+                              size="sm"
+                              @click="onSearchButtonClick" 
+                            >
+                              <div class="mr-1 ml-1">
+                                Cari
+                              </div>
+                            </b-button>
+                          </label>
+                        </div>
+                      </div>
+                      <!-- End search -->
+                    </div>
+                    <hr
+                      style="margin-left: -28px; 
+                            margin-right: -28px; 
+                            height: 2px; 
+                            background-color: #eee; 
+                            border: 0 none; 
+                            color: #eee;"
+                    >
+                    <div
+                      v-if="dashboard.psychologists.data.length > 0 && !isFetchingData"
+                      class="row"
+                    >
                       <div
-                        v-if="dashboard.psychologists.length > 0"
-                        class="row row-no-gutters mt-2"
-                        style="display:flex; justify-content: center; align-items: center;"
+                        v-for="(psychologist, index) in dashboard.psychologists.data"
+                        :key="index"
+                        class="col-xl-4 col-sm-6"
                       >
                         <div
-                          v-for="(psychologist, index) in dashboard.psychologists"
-                          :key="index"
-                          style="display:flex; justify-content: center; align-items: center;"
-                          class="px-0 p-2"
+                          class="card"
+                          style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); cursor: pointer;"
+                          @click="onProfileButtonClick(psychologist)"
                         >
-                          <div
-                            class="card h-100 mt-2 card-psikolog"
-                            style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); cursor: pointer;"
-                            @click="onProfileButtonClick(psychologist)"
-                          >
-                            <div
-                              class="card-body"
-                              style="padding:12px!important"
-                            >
-                              <div
-                                class="row"
-                                style="display: flex; align-items: center; justify-content: center;"
-                              >
-                                <img
-                                  class="rounded-circle header-profile-user ml-2"
-                                  src="@/assets/images/users/default_profile.jpg"
-                                  alt="Header Avatar"
-                                >
-                                <div class="column text-left mr-5 ml-3">
-                                  <div style="font-weight:bold;">
-                                    {{ psychologist.first_name + " " + psychologist.last_name + " " + psychologist.degree }}
-                                  </div>
-                                  <div class="font-size-12">
-                                    {{ psychologist.str_number ? psychologist.str_number : "No. STR" }}
-                                  </div>
-                                </div>
+                          <div class="card-body">
+                            <div class="text-center">
+                              <!-- <img
+                                  :src="`${data.image}`"
+                                  alt
+                                  class="avatar-sm mt-2 mb-4"
+                                > -->
+                              <div class="media-body">
+                                <h5 class="text-truncate">
+                                  <a
+                                    href="#"
+                                    class="text-dark"
+                                  >{{ psychologist.full_name }}</a>
+                                </h5>
+                                <p class="text-muted">
+                                  <i class="mdi mdi-account mr-1" /> {{ psychologist.speciality }}
+                                </p>
                                 <div v-if="isOnline(psychologist)">
                                   <button 
                                     type="button"
-                                    class="btn btn-primary m-1 btn-sm mr-2"
-                                    style="min-width:20%;"
+                                    class="btn btn-primary m-1 btn-sm"
+                                    style="min-width:40%;"
                                     @click.stop.prevent="onPilihButtonClick(psychologist)"
                                   >
                                     Pilih
@@ -445,23 +632,18 @@ function loading() {
                                 <div v-if="!isOnline(psychologist)">
                                   <button 
                                     type="button"
-                                    class="btn btn-secondary m-1 btn-sm mr-2"
-                                    style="min-width:20%;"
+                                    class="btn btn-secondary m-1 btn-sm"
+                                    style="min-width:40%;"
                                     :disabled="true"
                                   >
                                     Offline
                                   </button>
                                 </div>
                               </div>
-                              <div v-if="!isOnline(psychologist)">
-                                <hr
-                                  style="margin-left: -12px; 
-                                            margin-right: -12px; 
-                                            height: 2px; 
-                                            background-color: #eee; 
-                                            border: 0 none; 
-                                            color: #eee;"
-                                >
+                            </div>
+                            <div v-if="!isOnline(psychologist)">
+                              <hr class="my-4">
+                              <div class="text-center">
                                 <div class="font-size-12">
                                   Online berikutnya: {{ getDate(psychologist) ? getDate(psychologist).day + ", " + getDate(psychologist).time_start + "-" + getDate(psychologist).time_end : "-" }}
                                 </div>
@@ -470,26 +652,61 @@ function loading() {
                           </div>
                         </div>
                       </div>
+                    </div>
+                    <div
+                      v-if="dashboard.psychologists.data.length == 0 && !isFetchingData"
+                      class="row row-no-gutters"
+                      style="display:flex; justify-content: center; align-items: center;"
+                    >
                       <div
-                        v-if="dashboard.psychologists.length == 0"
-                        class="row row-no-gutters mt-2"
                         style="display:flex; justify-content: center; align-items: center;"
+                        class="px-0 p-1"
                       >
                         <div
-                          style="display:flex; justify-content: center; align-items: center;"
-                          class="px-0 p-2"
+                          class="card h-100 mt-2 card-psikolog"
+                          style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
                         >
                           <div
-                            class="card h-100 mt-2 card-psikolog"
-                            style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); cursor: pointer;"
+                            class="card-body"
                           >
-                            <div
-                              class="card-body"
-                              style="padding:12px!important"
-                            >
-                              data masih kosong untuk saat ini.
-                            </div>
+                            data tidak ditemukan.
                           </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      v-if="isFetchingData"
+                      class="row row-no-gutters"
+                      style="display:flex; justify-content: center; align-items: center;"
+                    >
+                      <div
+                        style="display:flex; justify-content: center; align-items: center;"
+                        class="px-0 p-1"
+                      >
+                        <div
+                          class="card h-100 mt-2 card-psikolog"
+                          style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
+                        >
+                          <div
+                            class="card-body"
+                          >
+                            tunggu sebentar...
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mt-2 ml-1 mr-1">
+                      <div class="col">
+                        <div class="d-inline-flex align-items-center">
+                          <ul class="pagination pagination-rounded mb-0">
+                            <!-- pagination -->
+                            <b-pagination 
+                              v-model="currentPage" 
+                              :total-rows="rows" 
+                              :per-page="perPage"
+                              @input="handlePageChange"
+                            />
+                          </ul>
                         </div>
                       </div>
                     </div>
