@@ -45,7 +45,7 @@ export default {
     async getDashboard(){
         loading();
         return (
-          api.getTestDashboard(this.user.id)
+          api.getTestDashboard(this.user.profile.id)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
                 if(response.data.data){

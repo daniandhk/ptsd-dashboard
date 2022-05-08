@@ -14,7 +14,7 @@ export default {
   },
   validations: {
       data_journal: {
-          user_id: { required },
+          patient_id: { required },
           text: { required }
       },
   },
@@ -32,7 +32,7 @@ export default {
       isJournalNull: false,
       isToday: true,
       data_journal: {
-          user_id: "",
+          patient_id: "",
           text: ""
       },
       submitted_journal: false,
@@ -104,7 +104,7 @@ export default {
             date,
         );
         return (
-          api.getJournalDashboard(this.user.id, params)
+          api.getJournalDashboard(this.user.profile.id, params)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
                 if(response.data.data){
@@ -185,7 +185,7 @@ export default {
       } else {
         let id = this.data_journal.id;
         let data = {
-            user_id: this.user.id,
+            patient_id: this.user.profile.id,
             text: this.data_journal.text
         }
         return (
@@ -205,7 +205,7 @@ export default {
 
     onSubmitJournalButtonClick(){
       loading();
-      this.data_journal.user_id = this.user.id;
+      this.data_journal.patient_id = this.user.profile.id;
       this.submitted_journal = true;
       // stop here if form is invalid
       this.$v.data_journal.$touch();

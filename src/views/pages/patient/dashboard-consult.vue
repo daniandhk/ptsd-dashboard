@@ -80,7 +80,7 @@ export default {
             this.perPage,
         );
         return (
-          api.getConsultDashboard(this.user.id, params)
+          api.getConsultDashboard(this.user.profile.id, params)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
                 if(response.data.data){
@@ -152,7 +152,7 @@ export default {
 
     onPilihButtonClick(data){
       Swal.fire({
-          title: "Ingin berkonsultasi dengan " + data.first_name + " " + data.last_name + " " + data.degree + "?",
+          title: "Ingin berkonsultasi dengan " + data.full_name + "?",
           text: "Anda dapat mengakhiri chat di menu chat.",
           icon: "warning",
           showCancelButton: true,
@@ -163,9 +163,7 @@ export default {
           if (result.value) {
               let relation = {
                 psychologist_id: data.id,
-                psychologist_user_id: data.user_id,
-                patient_id: this.user.id,
-                patient_user_id: this.user.user_id,
+                patient_id: this.user.profile.id,
                 status_test: 'none',
                 status_chat: true
               }
