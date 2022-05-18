@@ -16,6 +16,7 @@
     "@fullcalendar/timegrid": "^5.9.0",
     "@fullcalendar/vue": "^5.9.0",
     "@types/vuelidate": "^0.7.14",
+    "@vue/runtime-dom": "^3.2.33",
     "apexcharts": "^3.22.2",
     "axios": "^0.21.1",
     "bootstrap": "^4.5.3",
@@ -67,7 +68,8 @@
     "sass": "1.32.13",
     "sass-loader": "^8.0.2",
     "uglifyjs-webpack-plugin": "^2.2.0",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "@vue/runtime-dom": "latest"
   },
   "eslintConfig": {
     "root": true,
