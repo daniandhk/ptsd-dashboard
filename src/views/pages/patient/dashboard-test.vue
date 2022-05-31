@@ -294,7 +294,10 @@ function loading() {
                   <div style="color:black;">
                     <div>
                       <div v-if="isTestSubmitted[index] && !isTestFinished[index]">
-                        <div class="mt-4 mb-2">
+                        <div
+                          class="mt-4 mb-2"
+                          style="color:#005C9A; font-weight: bolder;"
+                        >
                           Verifikasi jawaban via Video Call
                         </div>
                         <div v-if="isScheduleNull[index]">
@@ -424,7 +427,10 @@ function loading() {
                           </div> -->
                         </div>
                       </div>
-                      <div v-if="!isTestSubmitted[index] && (!isTestFinished[index] || isTestFinished[index])">
+                      <div
+                        v-if="!isTestSubmitted[index] && (!isTestFinished[index] || isTestFinished[index])"
+                        style="color:#005C9A; font-weight: bolder;"
+                      >
                         Tes berikutnya
                         <div style="width:100%">
                           <b-button
@@ -439,7 +445,10 @@ function loading() {
                           </b-button>
                         </div>
                       </div>
-                      <div v-if="isTestSubmitted[index] && isTestFinished[index]">
+                      <div
+                        v-if="isTestSubmitted[index] && isTestFinished[index]"
+                        style="color:#005C9A; font-weight: bolder;"
+                      >
                         Tes berikutnya
                         <div
                           class="mt-2"
@@ -461,7 +470,7 @@ function loading() {
                     <div class="row">
                       <div class="col-lg-6 mt-4 mb-0 pb-0">
                         <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; height:85%;">
-                          <div>
+                          <div style="color:#005C9A; font-weight: bolder;">
                             Tes terakhir dilakukan
                           </div>
                           <div v-if="isTestNull[index]">
@@ -531,8 +540,11 @@ function loading() {
                                   >
                                     Tingkat keparahan gejala Anda tinggi?
                                   </p> 
-                                  <div class="text-muted">
-                                    Harap segera hubungi psikolog atau wali Anda.
+                                  <div
+                                    class="text-muted"
+                                    style="font-size:12px;"
+                                  >
+                                    Tekan tombol untuk menghubungi psikolog atau wali Anda.
                                   </div>
                                 </div>
                               </div>
@@ -542,7 +554,7 @@ function loading() {
                       </div>
                       <div class="col-lg-6 mt-4">
                         <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; height:85%;">
-                          <div>
+                          <div style="color:#005C9A; font-weight: bolder;">
                             Hasil tes
                           </div>
                           <div v-if="isTestNull[index]">
@@ -562,7 +574,7 @@ function loading() {
                               >
                                 <div style="width: 80%; height: 100%;">
                                   <p
-                                    style="color:#005C9A; font-size:16px; text-align:center; font-weight: bold;"
+                                    style="font-size:16px; text-align:center; font-weight: bold;"
                                   >
                                     Tingkat Keparahan Gejala
                                   </p>
@@ -578,7 +590,7 @@ function loading() {
                                     }"
                                   />
                                   <div
-                                    style="color:#005C9A; font-size:16px; text-align:center; font-weight: bold;"
+                                    style="font-size:16px; text-align:center; font-weight: bold;"
                                   >
                                     Skor: {{ test_type.current_test.score }} dari {{ test_type.total_score }}
                                   </div>

@@ -1,56 +1,17 @@
 <script>
-import simplebar from "simplebar-vue";
-import i18n from "../i18n";
 import store from '@/store';
 
 export default {
   components: {  },
   data() {
     return {
-      current_language: "en",
-      // getRole: store.getters.getRoleUser,
-      // user: store.getters.getLoggedUser
-      user: {
-        first_name: "First",
-        last_name: "Last"
-      }
+      user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
     };
   },
   methods: {
     toggleMenu() {
       this.$parent.toggleMenu();
     },
-    initFullScreen() {
-      document.body.classList.toggle("fullscreen-enable");
-      if (
-        !document.fullscreenElement &&
-        /* alternative standard method */ !document.mozFullScreenElement &&
-        !document.webkitFullscreenElement
-      ) {
-        // current working methods
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) {
-          document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-          document.documentElement.webkitRequestFullscreen(
-            Element.ALLOW_KEYBOARD_INPUT
-          );
-        }
-      } else {
-        if (document.cancelFullScreen) {
-          document.cancelFullScreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitCancelFullScreen) {
-          document.webkitCancelFullScreen();
-        }
-      }
-    },
-    // setLanguage(locale) {
-    //   i18n.locale = locale;
-    //   this.current_language = i18n.locale;
-    // },
   }
 };
 </script>
@@ -89,14 +50,14 @@ export default {
               <img
                 src="@/assets/logo-mini.png"
                 alt
-                height="40"
+                height="30"
               >
             </span>
             <span class="logo-lg">
               <img
                 src="@/assets/logo-full.png"
                 alt
-                height="40"
+                height="30"
               >
             </span>
           </a>
@@ -113,16 +74,6 @@ export default {
       </div>
 
       <div class="d-flex">
-        <!-- <div class="dropdown d-none d-lg-inline-block ml-1">
-          <button
-            type="button"
-            class="btn header-item noti-icon waves-effect"
-            @click="initFullScreen"
-          >
-            <i class="ri-fullscreen-line"></i>
-          </button>
-        </div> -->
-
         <b-dropdown
           right
           variant="black"
@@ -138,13 +89,13 @@ export default {
             <span
               class="d-none d-xl-inline-block ml-2 mr-2"
               style="font-size:16px"
-            >halo, {{ user.first_name }}</span>
+            >halo, {{ user.profile ? user.profile.full_name : user.email }}</span>
             <i class="mdi mdi-chevron-down d-none d-xl-inline-block" />
           </template>
           <!-- item-->
           <a class="dropdown-item">
             <i class="ri-user-line align-middle mr-1" />
-            {{ user.first_name + " " + user.last_name }}
+            {{ user.email }}
           </a>
           <a
             class="dropdown-item d-block"

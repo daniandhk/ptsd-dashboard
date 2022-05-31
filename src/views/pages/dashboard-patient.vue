@@ -69,13 +69,27 @@ export default {
 </script>
 
 <template>
-  <div style="height:100vh">
+  <div>
     <Topbar />
-    <div style="overflow-x: hidden;">
+    <div
+      v-if="viewEmail || viewProfile || viewGuardian"
+      class="popup-body"
+    >
       <ConfirmEmail v-if="viewEmail" />
       <SetupProfile v-if="viewProfile" />
       <SetupGuardian v-if="viewGuardian" />
-      <MainPage v-if="!viewEmail && !viewProfile && !viewGuardian" />
     </div>
+    <MainPage v-if="!viewEmail && !viewProfile && !viewGuardian" />
   </div>
 </template>
+
+<style>
+  .popup-body {
+    margin-top: 3rem;
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    height: 100%;
+    overflow: hidden; overflow-x: hidden;
+  }
+</style>

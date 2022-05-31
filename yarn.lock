@@ -9395,6 +9395,11 @@ vue-router@^3.4.9:
   resolved "https://registry.npmjs.org/vue-router/-/vue-router-3.5.2.tgz"
   integrity sha512-807gn82hTnjCYGrnF3eNmIw/dk7/GE4B5h69BlyCK9KHASwSloD1Sjcn06zg9fVG4fYH2DrsNBZkpLtb25WtaQ==
 
+vue-screen@^1.5.6:
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/vue-screen/-/vue-screen-1.5.6.tgz#63da5a0b2be91b23326c7bedfbc45f707065f512"
+  integrity sha512-UL+5RLDUQw6OlvAkBWgDi56pvlWS3cx1rQ8zrQGN9oRMNtrOXEx9bUkS/+/zKs/z4py9lJDILLSd+h4ruoUhQg==
+
 vue-slide-bar@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/vue-slide-bar/-/vue-slide-bar-1.2.0.tgz"

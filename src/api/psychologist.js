@@ -7,3 +7,11 @@ export function inputProfilePsychologist(data){
         data: data
     })
 }
+
+export function inputChatSchedules(data){
+    return httpAxios({
+        url: '/chatschedule/create',
+        method: 'POST',
+        data: data
+    })
+}

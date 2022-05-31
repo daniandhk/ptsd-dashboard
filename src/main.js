@@ -11,6 +11,7 @@ import router from './router'
 import i18n from './i18n'
 import store from './store'
 import "@/assets/scss/app.scss"
+import VueScreen from 'vue-screen'
 
 const options = {
   name: '_blank',
@@ -27,17 +28,18 @@ const options = {
   autoClose: true,
 }
 
-Vue.config.productionTip = false
-Vue.prototype.$backendUrl = process.env.VUE_APP_BACKEND_URL + '/api'
-Vue.use(BootstrapVue)
-Vue.use(BootstrapVueIcons)
-Vue.use(vco)
-Vue.use(Vuelidate)
+Vue.config.productionTip = false;
+Vue.prototype.$backendUrl = process.env.VUE_APP_BACKEND_URL + '/api';
+Vue.use(BootstrapVue);
+Vue.use(BootstrapVueIcons);
+Vue.use(vco);
+Vue.use(Vuelidate);
 Vue.use(VueSweetalert2);
-Vue.use(VueMask)
+Vue.use(VueMask);
 Vue.use(Notification);
-Vue.use(require('vue-chartist'))
-Vue.component('apexchart', VueApexCharts)
+Vue.use(require('vue-chartist'));
+Vue.component('apexchart', VueApexCharts);
+Vue.use(VueScreen);
 
 new Vue({
   router,

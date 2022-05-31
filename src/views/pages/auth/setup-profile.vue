@@ -108,10 +108,7 @@ function loading() {
 </script>
 
 <template>
-  <div
-    class="mt-5"
-    style="display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; overflow-x: hidden;"
-  >
+  <div>
     <div
       id="loading"
       style="display:none; z-index:100; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
@@ -123,9 +120,7 @@ function loading() {
         role="status"
       />
     </div>
-    <div
-      style="min-height: 100%; display: flex;"
-    >
+    <div style="min-height: 100%; display: flex;">
       <div
         class="card h-100 m-5"
         style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
@@ -329,30 +324,7 @@ function loading() {
                       </button>
                     </div>
                   </form>
-                  <!-- <div class="m-3 text-center">
-                    <p>Atau</p>
-                  </div>
-                  <div class="mb-4 text-center">
-                    <button
-                      class="btn btn-danger w-md waves-effect waves-light"
-                      style="width:100%;"
-                      @click="onOrButtonClick()"
-                    >
-                      Log Out
-                    </button>
-                  </div> -->
                 </div>
-
-                <!-- <div class="mt-5 text-center">
-                        <a
-                          href="/about-us"
-                          style="text-decoration: none; color: inherit;"
-                        >
-                          <p>
-                            © 2021 Informatics Lab.
-                          </p>
-                        </a>
-                      </div> -->
               </div>
             </div>
           </div>

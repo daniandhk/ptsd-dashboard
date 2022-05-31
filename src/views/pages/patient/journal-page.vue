@@ -41,12 +41,8 @@ export default {
         backgroundColor: "#F0F4F6",
       },
 
-      totalRows: 1,
       currentPage: 1,
       perPage: 10,
-      pageOptions: [10, 25, 50, 100],
-      filter: null,
-      filterOn: [],
       sortBy: "question_text",
       sortDesc: false,
       dataNotes: [],
@@ -139,6 +135,7 @@ export default {
 
             if(this.dashboard.note_question){
                 this.dataNotes = this.dashboard.note_question
+                this.perPage = this.dashboard.note_question.length
             }
         }
     },
@@ -514,9 +511,7 @@ function loading() {
                               :current-page="currentPage"
                               :sort-by="sortBy"
                               :sort-desc="sortDesc"
-                              :filter="filter"
                               :head-variant="'dark'"
-                              :filter-included-fields="filterOn"
                               show-empty
                             >
                               <!-- eslint-disable-next-line vue/no-unused-vars -->

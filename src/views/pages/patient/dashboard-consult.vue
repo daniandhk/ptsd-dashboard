@@ -31,10 +31,14 @@ export default {
       totalRows: 1,
       currentPage: 1,
       perPage: 6,
-      pageOptions: [6, 12, 30, 50, 100],
+      pageOptions: [6, 12, 30, 60, 120],
       filter: "",
       filterOn: [],
       isFetchingData: false,
+
+      interval: null,
+      time: moment().locale('id').format('HH:mm:ss'),
+      date: moment().locale('id').format('dddd, LL'),
     };
   },
   computed: {
@@ -45,6 +49,18 @@ export default {
     rows() {
       return this.totalRows;
     },
+  },
+  beforeDestroy() {
+    // prevent memory leak
+    clearInterval(this.interval)
+  },
+  created() {
+    // update the time every second
+    this.interval = setInterval(() => {
+      // Concise way to format time according to system locale.
+      this.time = moment().locale('id').format('HH:mm:ss')
+      this.date = moment().locale('id')
+    }, 1000)
   },
   mounted: async function(){
     this.isLoading = true;
@@ -107,7 +123,7 @@ export default {
 
             if(this.dashboard.consult){
               this.haveConsult = true;
-              let today = this.formatDate(moment(), 'tanggal')
+              let today = this.formatDate(this.date, 'tanggal')
               let hari = this.formatDate(this.dashboard.consult.next_date, 'tanggal')
               if(moment(today).isSameOrAfter(hari)){
                 this.isConsultToday = true;
@@ -127,7 +143,6 @@ export default {
               this.haveConsult = false;
             }
         }
-        console.log(this.haveRelation)
     },
 
     async refreshData(){
@@ -164,13 +179,12 @@ export default {
               let relation = {
                 psychologist_id: data.id,
                 patient_id: this.user.profile.id,
-                status_test: 'none',
-                status_chat: true
               }
               api.createRelation(relation)
               // eslint-disable-next-line no-unused-vars
               .then(response => {
-                  window.open("http://help-ptsd-chat.herokuapp.com/");
+                  Swal.fire("chat", "success");
+                  // window.open("http://help-ptsd-chat.herokuapp.com/");
               })
               .catch(error => {
                 //
@@ -180,35 +194,11 @@ export default {
     },
 
     isOnline(data){
-      if(data.chat_schedule.length > 0){
-        let today = this.formatDate(moment(), 'hari')
-        data.chat_schedule.forEach((element, index, array) => {
-            let hari = this.formatDate(element.day, 'hari')
-            if(moment(today).isSame(hari)){
-              return true;
-            }
-        });
-        return false;
-      }
-      else{
-        return false;
-      }
+      return data.online_schedule.is_online;
     },
 
     getDate(data){
-      if(data.chat_schedule.length > 0){
-        let today = this.formatDate(moment(), 'hari')
-        data.chat_schedule.forEach((element, index, array) => {
-            let hari = this.formatDate(element.day, 'hari')
-            if(moment(today).isBefore(hari)){
-              return element;
-            }
-        });
-        return null;
-      }
-      else{
-        return null;
-      }
+      return data.online_schedule.schedule;
     },
 
     formatDate(date, format){
@@ -222,6 +212,14 @@ export default {
         else if(format == 'hari'){
           return moment(date).locale('id').format('dddd')
         }
+        else if(format == 'jam'){
+          let combined = moment().format('YYYY-MM-DD') + " " + date;
+          return moment(String(combined)).format('HH:mm')
+        }
+        else if(format == 'combined'){
+          let combined = moment().format('YYYY-MM-DD') + " " + date;
+          return String(combined)
+        }
         else{
           return moment(date).locale('id')
         }
@@ -229,6 +227,13 @@ export default {
       else{
         return "-"
       }
+    },
+
+    getDayIndex(day){
+      let days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+
+      let getIndex = days.indexOf(day);
+      return getIndex;
     },
 
     async onSearchButtonClick(){
@@ -498,7 +503,7 @@ function loading() {
                               <hr class="my-4">
                               <div class="text-center">
                                 <div class="font-size-12">
-                                  Online berikutnya: {{ getDate(dashboard.psychologist) ? getDate(dashboard.psychologist).day + ", " + getDate(dashboard.psychologist).time_start + "-" + getDate(dashboard.psychologist).time_end : "-" }}
+                                  Jadwal berikutnya: {{ getDate(dashboard.psychologist) ? getDate(dashboard.psychologist).day + ", " + formatDate(getDate(dashboard.psychologist).time_start, 'jam') + "-" + formatDate(getDate(dashboard.psychologist).time_end, 'jam') : "-" }}
                                 </div>
                               </div>
                             </div>
@@ -587,7 +592,7 @@ function loading() {
                             color: #eee;"
                     >
                     <div
-                      v-if="dashboard.psychologists.data.length > 0 && !isFetchingData"
+                      v-if="dashboard.psychologists.total > 0 && !isFetchingData"
                       class="row"
                     >
                       <div
@@ -618,9 +623,18 @@ function loading() {
                                   <i class="mdi mdi-account mr-1" /> {{ psychologist.speciality }}
                                 </p>
                                 <div v-if="isOnline(psychologist)">
+                                  <div class="text-center">
+                                    <div
+                                      class="font-size-12"
+                                      style="color:#1cbb8c; font-weight:bold;"
+                                    >
+                                      • Online
+                                    </div>
+                                  </div>
+                                  <hr class="my-3">
                                   <button 
                                     type="button"
-                                    class="btn btn-primary m-1 btn-sm"
+                                    class="btn btn-primary btn-sm"
                                     style="min-width:40%;"
                                     @click.stop.prevent="onPilihButtonClick(psychologist)"
                                   >
@@ -628,22 +642,23 @@ function loading() {
                                   </button>
                                 </div>
                                 <div v-if="!isOnline(psychologist)">
-                                  <button 
-                                    type="button"
-                                    class="btn btn-secondary m-1 btn-sm"
-                                    style="min-width:40%;"
-                                    :disabled="true"
+                                  <div class="text-center">
+                                    <div
+                                      class="font-size-12"
+                                      style="color:gray; font-weight:bold;"
+                                    >
+                                      • Offline
+                                    </div>
+                                  </div>
+                                  <hr class="my-3">
+                                  <div
+                                    class="text-center d-flex"
+                                    style="height:28.9px; align-items: center; justify-content: center;"
                                   >
-                                    Offline
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                            <div v-if="!isOnline(psychologist)">
-                              <hr class="my-4">
-                              <div class="text-center">
-                                <div class="font-size-12">
-                                  Online berikutnya: {{ getDate(psychologist) ? getDate(psychologist).day + ", " + getDate(psychologist).time_start + "-" + getDate(psychologist).time_end : "-" }}
+                                    <div class="font-size-12">
+                                      Jadwal berikutnya: {{ getDate(psychologist) ? getDate(psychologist).day + ", " + formatDate(getDate(psychologist).time_start, 'jam') + "-" + formatDate(getDate(psychologist).time_end, 'jam') : "-" }}
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -652,7 +667,7 @@ function loading() {
                       </div>
                     </div>
                     <div
-                      v-if="dashboard.psychologists.data.length == 0 && !isFetchingData"
+                      v-if="dashboard.psychologists.total == 0 && !isFetchingData"
                       class="row row-no-gutters"
                       style="display:flex; justify-content: center; align-items: center;"
                     >

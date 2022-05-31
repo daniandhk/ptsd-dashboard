@@ -1,48 +1,15 @@
 <script>
-import simplebar from "simplebar-vue";
-import i18n from "../i18n";
 import store from '@/store';
 
 export default {
   components: {  },
   data() {
     return {
-      current_language: "en",
       user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
     };
   },
   methods: {
-    initFullScreen() {
-      document.body.classList.toggle("fullscreen-enable");
-      if (
-        !document.fullscreenElement &&
-        /* alternative standard method */ !document.mozFullScreenElement &&
-        !document.webkitFullscreenElement
-      ) {
-        // current working methods
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) {
-          document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-          document.documentElement.webkitRequestFullscreen(
-            Element.ALLOW_KEYBOARD_INPUT
-          );
-        }
-      } else {
-        if (document.cancelFullScreen) {
-          document.cancelFullScreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitCancelFullScreen) {
-          document.webkitCancelFullScreen();
-        }
-      }
-    },
-    // setLanguage(locale) {
-    //   i18n.locale = locale;
-    //   this.current_language = i18n.locale;
-    // },
+    //
   }
 };
 </script>
@@ -96,16 +63,6 @@ export default {
       </div>
 
       <div class="d-flex">
-        <!-- <div class="dropdown d-none d-lg-inline-block ml-1">
-          <button
-            type="button"
-            class="btn header-item noti-icon waves-effect"
-            @click="initFullScreen"
-          >
-            <i class="ri-fullscreen-line"></i>
-          </button>
-        </div> -->
-
         <b-dropdown
           right
           variant="black"
@@ -121,7 +78,7 @@ export default {
             <span
               class="d-none d-xl-inline-block ml-2 mr-2"
               style="font-size:16px"
-            >halo, {{ user.profile ? user.profile.first_name : user.email }}</span>
+            >halo, {{ user.profile ? (user.profile.first_name ? user.profile.first_name : user.profile.full_name) : user.email }}</span>
             <i class="mdi mdi-chevron-down d-none d-xl-inline-block" />
           </template>
           <!-- item-->

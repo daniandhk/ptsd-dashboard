@@ -78,7 +78,6 @@ export default {
             })
             .catch(error => {
               loading();
-              console.log(error)
               this.tryingToLogIn = false;
               this.authError = error.response.data.message;
               this.isAuthError = true;

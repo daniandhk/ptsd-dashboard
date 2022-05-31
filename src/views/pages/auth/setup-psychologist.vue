@@ -112,10 +112,7 @@ function loading() {
 </script>
 
 <template>
-  <div
-    class="mt-5"
-    style="display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; overflow-x: hidden;"
-  >
+  <div>
     <div
       id="loading"
       style="display:none; z-index:100; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
@@ -127,9 +124,7 @@ function loading() {
         role="status"
       />
     </div>
-    <div
-      style="min-height: 100%; display: flex;"
-    >
+    <div style="min-height: 100%; display: flex;">
       <div
         class="card h-100 m-5"
         style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
