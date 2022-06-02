@@ -128,11 +128,6 @@ export default {
       });
     },
 
-    onProfileButtonClick(data){
-      this.dataProfile = data
-      this.$bvModal.show('modal-profile');
-    },
-
     onGoToLinkButtonClick(link){
       if(link == 'chat'){
         window.open("http://help-ptsd-chat.herokuapp.com/");
@@ -140,44 +135,6 @@ export default {
       else{
         window.open(link);
       }
-    },
-
-    isOnline(data){
-      if(data.chat_schedule.length > 0){
-        let today = this.formatDate(moment(), 'hari')
-        data.chat_schedule.forEach((element, index, array) => {
-            let hari = this.formatDate(element.day, 'hari')
-            if(moment(today).isSame(hari)){
-              return true;
-            }
-        });
-        return false;
-      }
-      else{
-        return false;
-      }
-    },
-
-    getDate(data){
-      if(data.chat_schedule.length > 0){
-        let today = this.formatDate(moment(), 'hari')
-        data.chat_schedule.forEach((element, index, array) => {
-            let hari = this.formatDate(element.day, 'hari')
-            if(moment(today).isBefore(hari)){
-              return element;
-            }
-        });
-        return null;
-      }
-      else{
-        return null;
-      }
-    },
-
-    onJournalButtonClick(){
-      this.$router.push({
-          name: 'journal'
-      });
     },
 
     formatDate(date, format){
@@ -369,62 +326,7 @@ function loading() {
                               </div>
                             </div>
                           </div>
-                          <!-- <div>
-                            <div class="mt-4 mb-2">
-                              Profil psikolog
-                            </div>
-                            <div
-                              class="row mt-4"
-                              style="display:flex; justify-content: center; align-items: center;"
-                            >
-                              <div class="col-xl-6 col-sm-12">
-                                <div
-                                  class="card"
-                                  style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); cursor: pointer;"
-                                  @click="onProfileButtonClick(dashboard.psychologist)"
-                                >
-                                  <div class="card-body">
-                                    <div class="text-center">
-                                      <img
-                                        :src="`${data.image}`"
-                                        alt
-                                        class="avatar-sm mt-2 mb-4"
-                                      >
-                                      <div class="media-body">
-                                        <h5 class="text-truncate">
-                                          <a
-                                            href="#"
-                                            class="text-dark"
-                                          >{{ dashboard.psychologist.full_name }}</a>
-                                        </h5>
-                                        <p class="text-muted">
-                                          <i class="mdi mdi-account mr-1" /> {{ dashboard.psychologist.speciality }}
-                                        </p>
-                                        <div>
-                                          <button 
-                                            type="button"
-                                            class="btn btn-success m-1 btn-sm"
-                                            style="min-width:40%;"
-                                            @click.stop.prevent="onGoToLinkButtonClick('chat')"
-                                          >
-                                            Chat
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div v-if="!isOnline(dashboard.psychologist)">
-                                      <hr class="my-4">
-                                      <div class="text-center">
-                                        <div class="font-size-12">
-                                          Online berikutnya: {{ getDate(dashboard.psychologist) ? getDate(dashboard.psychologist).day + ", " + getDate(dashboard.psychologist).time_start + "-" + getDate(dashboard.psychologist).time_end : "-" }}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div> -->
+                          <!-- Card psikolog -->
                         </div>
                       </div>
                       <div
@@ -609,56 +511,6 @@ function loading() {
         </div>
       </div>
     </div>
-
-    <!-- <div name="modalProfile">
-      <b-modal 
-        id="modal-profile" 
-        size="md" 
-        title="Profil Psikolog" 
-        hide-footer 
-        title-class="font-18"
-      >
-        <template v-slot:title>
-          <a class="font-weight-bold active">Profil Psikolog</a>
-        </template>
-        <template>
-          <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <img
-              class="rounded-circle"
-              src="@/assets/images/users/default_profile.jpg"
-              alt="Header Avatar"
-              width="120"
-              height="120"
-            >
-            <div>
-              <div class="row mt-5">
-                <div class="column">
-                  <p>Nama</p>
-                  <p>Pengalaman</p>
-                  <p>Tempat Praktik</p>
-                  <p>Nomor STR</p>
-                </div>
-                <div class="column mr-2 ml-2">
-                  <p>:</p>
-                  <p>:</p>
-                  <p>:</p>
-                  <p>:</p>
-                </div>
-                <div
-                  class="column"
-                  style="color:black;"
-                >
-                  <p>{{ dataProfile ? dataProfile.first_name + " " + dataProfile.last_name + " " + dataProfile.degree : "nama" }}</p>
-                  <p>{{ dataProfile ? dataProfile.years_experience + " " + "Tahun" : "tahun" }}</p>
-                  <p>{{ dataProfile ? dataProfile.workplace + " " : "tempat" }}</p>
-                  <p>{{ dataProfile ? dataProfile.str_number + " " : "str" }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </template>
-      </b-modal>
-    </div> -->
   </div>
 </template>
 

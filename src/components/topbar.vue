@@ -3,9 +3,17 @@ import store from '@/store';
 
 export default {
   components: {  },
+  props: {
+    isResizeable: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
+      backendUrl: process.env.VUE_APP_BACKEND_URL,
+      avatarUrl: store.getters.getLoggedUser ? (store.getters.getLoggedUser.profile ? (store.getters.getLoggedUser.profile.image ? store.getters.getLoggedUser.profile.image : 'avatars/default_profile.jpg') : 'avatars/default_profile.jpg') : 'avatars/default_profile.jpg'
     };
   },
   methods: {
@@ -48,6 +56,13 @@ export default {
           >
             <span class="logo-sm">
               <img
+                v-if="!isResizeable"
+                src="@/assets/logo-mini.png"
+                alt
+                height="40"
+              >
+              <img
+                v-if="isResizeable"
                 src="@/assets/logo-mini.png"
                 alt
                 height="30"
@@ -55,6 +70,13 @@ export default {
             </span>
             <span class="logo-lg">
               <img
+                v-if="!isResizeable"
+                src="@/assets/logo-full.png"
+                alt
+                height="40"
+              >
+              <img
+                v-if="isResizeable"
                 src="@/assets/logo-full.png"
                 alt
                 height="30"
@@ -64,6 +86,7 @@ export default {
         </div>
 
         <button
+          v-if="isResizeable"
           id="vertical-menu-btn"
           type="button"
           class="btn btn-sm px-3 font-size-24 header-item waves-effect"
@@ -83,20 +106,20 @@ export default {
           <template v-slot:button-content>
             <img
               class="rounded-circle header-profile-user"
-              src="@/assets/images/users/default_profile.jpg"
+              :src="backendUrl + '/' + avatarUrl"
               alt="Header Avatar"
             >
             <span
               class="d-none d-xl-inline-block ml-2 mr-2"
               style="font-size:16px"
-            >halo, {{ user.profile ? user.profile.full_name : user.email }}</span>
+            >halo, {{ user.profile ? (user.profile.first_name ? user.profile.first_name : user.profile.full_name) : user.email }}</span>
             <i class="mdi mdi-chevron-down d-none d-xl-inline-block" />
           </template>
           <!-- item-->
-          <a class="dropdown-item">
+          <!-- <a class="dropdown-item">
             <i class="ri-user-line align-middle mr-1" />
             {{ user.email }}
-          </a>
+          </a> -->
           <a
             class="dropdown-item d-block"
             href="/settings/change-password"

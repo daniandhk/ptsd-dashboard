@@ -1,7 +1,7 @@
 <script>
 import Layout from "../layouts/main";
 import PageHeader from "@/components/page-header";
-import Topbar from "@/components/topbar-patient";
+import Topbar from "@/components/topbar";
 import ConfirmEmail from "@/views/pages/auth/confirm-email";
 import SetupProfile from "@/views/pages/auth/setup-psychologist";
 import SetupSchedule from "@/views/pages/auth/setup-schedule";
@@ -83,7 +83,7 @@ export default {
 <template>
   <div>
     <div v-if="viewEmail || viewProfile || viewChatSchedule">
-      <Topbar />
+      <Topbar :is-resizeable="false" />
       <div class="popup-body">
         <ConfirmEmail v-if="viewEmail" />
         <SetupProfile v-if="viewProfile" />

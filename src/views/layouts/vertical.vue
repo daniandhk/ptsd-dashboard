@@ -72,7 +72,7 @@ export default {
 
     <!-- Begin page -->
     <div id="layout-wrapper">
-      <Topbar />
+      <Topbar :is-resizeable="true" />
       <SideBar
         :is-condensed="isMenuCondensed"
         :type="leftSidebarType"

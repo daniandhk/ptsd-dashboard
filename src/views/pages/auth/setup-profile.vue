@@ -31,7 +31,9 @@ export default {
           last_name: "",
           phone: "",
       },
-      
+
+      croppa: null,
+      //
     };
   },
   validations: {
@@ -55,7 +57,7 @@ export default {
   methods: {
     ...notificationMethods,
 
-    tryToRegister(){
+    async tryToRegister(){
       loading();
       this.submitted = true;
       this.profileData.province = this.data_province.provinsi;
@@ -68,8 +70,9 @@ export default {
       } else {
         this.registerError = null;
         this.profileData.user_id = this.user.id;
+        const dataInput = await this.toFormData(this.profileData);
         return (
-          api.inputProfilePatient(this.profileData)
+          api.inputProfilePatient(dataInput)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
               loading();
@@ -82,6 +85,23 @@ export default {
             })
         );
       }
+    },
+
+    async toFormData(data){
+      let formData = new FormData;
+      if(this.croppa.hasImage()){
+        const blob = await this.croppa.promisedBlob();
+        formData.append('avatar', blob);
+        formData.append('image_name', this.croppa.getChosenFile().name);
+      }
+      formData.append('user_id', data.user_id);
+      formData.append('province', data.province);
+      formData.append('city', data.city);
+      formData.append('datebirth', data.datebirth);
+      formData.append('first_name', data.first_name);
+      formData.append('last_name', data.last_name);
+      formData.append('phone', data.phone);
+      return formData;
     },
 
     selectProvince(value){
@@ -125,7 +145,10 @@ function loading() {
         class="card h-100 m-5"
         style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
       >
-        <div class="card-body">
+        <div
+          class="card-body"
+          style="max-width:548px"
+        >
           <div class="text-center form-group mb-0">
             <div
               class="mr-5 ml-5 mt-2 mb-2"
@@ -181,6 +204,92 @@ function loading() {
                     style="min-width:260px;"
                     @submit.prevent="tryToRegister"
                   >
+                    <div
+                      class="col-md-12"
+                      style="padding:0!important; margin:0!important"
+                    >
+                      <div
+                        class="form-group text-center col-md-12"
+                        style="padding:0!important; padding-left:2px!important; padding-right:2px!important;"
+                      >
+                        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                          <label for="image">Foto Profil</label>
+                          <div style="justify-content: center;">
+                            <croppa v-model="croppa" />
+                          </div>
+                          <div
+                            v-if="croppa && croppa.hasImage()"
+                            class="row col-lg-8"
+                            style="justify-content: center;"
+                          >
+                            <div class="m-1">
+                              <b-button
+                                variant="outline-secondary"
+                                size="sm"
+                                style="width:90px"
+                                @click="croppa.moveUpwards(10)"
+                              >
+                                move up
+                              </b-button>
+                            </div>
+                            <div class="m-1">
+                              <b-button
+                                variant="outline-secondary"
+                                size="sm"
+                                style="width:90px"
+                                @click="croppa.moveDownwards(10)"
+                              >
+                                move down
+                              </b-button>
+                            </div>
+                            <div class="m-1">
+                              <b-button
+                                variant="outline-secondary"
+                                size="sm"
+                                style="width:90px"
+                                @click="croppa.moveLeftwards(10)"
+                              >
+                                move left
+                              </b-button>
+                            </div>
+                            <div class="m-1">
+                              <b-button
+                                variant="outline-secondary"
+                                size="sm"
+                                style="width:90px"
+                                @click="croppa.moveRightwards(10)"
+                              >
+                                move right
+                              </b-button>
+                            </div>
+                            <div class="m-1">
+                              <b-button
+                                variant="outline-secondary"
+                                size="sm"
+                                style="width:90px"
+                                @click="croppa.zoomIn()"
+                              >
+                                zoom in
+                              </b-button>
+                            </div>
+                            <div class="m-1">
+                              <b-button
+                                variant="outline-secondary"
+                                size="sm"
+                                style="width:90px"
+                                @click="croppa.zoomOut()"
+                              >
+                                zoom out
+                              </b-button>
+                            </div>
+                          </div>
+                        </div>
+                        <hr
+                          class="mb-4 mt-4"
+                          style="margin-left: -76px;margin-right: -76px;"
+                        >
+                      </div>
+                    </div>
                     <div
                       class="row col-md-12"
                       style="padding:0!important; margin:0!important"

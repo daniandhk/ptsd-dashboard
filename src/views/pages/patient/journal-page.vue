@@ -576,23 +576,23 @@ function loading() {
 </template>
 
 <style scoped>
-  .datepicker-today >>> input {
+  .datepicker-other >>> input {
     height:38.64px;
     background-color: #005C9A;
     color: white;
     text-align:center;
   }
-  .datepicker-today >>> i {
+  .datepicker-other >>> i {
     color: white;
   }
 
-  .datepicker-other >>> input {
+  .datepicker-today >>> input {
     height:38.64px;
     background-color: #eff2f7;
     color: #212529;
     text-align:center;
   }
-  .datepicker-other >>> i {
+  .datepicker-today >>> i {
     color: #212529;
   }
 </style>

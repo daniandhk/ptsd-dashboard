@@ -12,6 +12,7 @@ export default {
   data() {
     return {
       user: store.getters.getLoggedUser ? store.getters.getLoggedUser : null,
+      backendUrl: process.env.VUE_APP_BACKEND_URL,
       dashboard: {
           test: {
               created_at: ""
@@ -167,7 +168,7 @@ export default {
 
     onPilihButtonClick(data){
       Swal.fire({
-          title: "Ingin berkonsultasi dengan " + data.full_name + "?",
+          title: "Ingin berkonsultasi dengan <br /> " + data.full_name + "?",
           text: "Anda dapat mengakhiri chat di menu chat.",
           icon: "warning",
           showCancelButton: true,
@@ -472,11 +473,11 @@ function loading() {
                         >
                           <div class="card-body">
                             <div class="text-center">
-                              <!-- <img
-                                  :src="`${data.image}`"
-                                  alt
-                                  class="avatar-sm mt-2 mb-4"
-                                > -->
+                              <img
+                                :src="backendUrl + '/' + (dashboard.psychologist.image ? dashboard.psychologist.image : 'avatars/default_profile.jpg')"
+                                alt
+                                class="avatar-lg mt-2 mb-4 rounded-circle"
+                              >
                               <div class="media-body">
                                 <h5 class="text-truncate">
                                   <a
@@ -491,7 +492,7 @@ function loading() {
                                   <button 
                                     type="button"
                                     class="btn btn-success m-1 btn-sm"
-                                    style="min-width:40%;"
+                                    style="min-width:100%;"
                                     @click.stop.prevent="onGoToLinkButtonClick('chat')"
                                   >
                                     Chat
@@ -607,11 +608,11 @@ function loading() {
                         >
                           <div class="card-body">
                             <div class="text-center">
-                              <!-- <img
-                                  :src="`${data.image}`"
-                                  alt
-                                  class="avatar-sm mt-2 mb-4"
-                                > -->
+                              <img
+                                :src="backendUrl + '/' + (psychologist.image ? psychologist.image : 'avatars/default_profile.jpg')"
+                                alt
+                                class="avatar-lg mt-2 mb-4 rounded-circle"
+                              >
                               <div class="media-body">
                                 <h5 class="text-truncate">
                                   <a
@@ -631,11 +632,11 @@ function loading() {
                                       • Online
                                     </div>
                                   </div>
-                                  <hr class="my-3">
+                                  <hr class="mt-2 mb-3">
                                   <button 
                                     type="button"
                                     class="btn btn-primary btn-sm"
-                                    style="min-width:40%;"
+                                    style="min-width:100%;"
                                     @click.stop.prevent="onPilihButtonClick(psychologist)"
                                   >
                                     Pilih
@@ -650,7 +651,7 @@ function loading() {
                                       • Offline
                                     </div>
                                   </div>
-                                  <hr class="my-3">
+                                  <hr class="my-2">
                                   <div
                                     class="text-center d-flex"
                                     style="height:28.9px; align-items: center; justify-content: center;"
@@ -747,7 +748,7 @@ function loading() {
           <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
             <img
               class="rounded-circle"
-              src="@/assets/images/users/default_profile.jpg"
+              :src="backendUrl + '/' + (dataProfile ? (dataProfile.image ? dataProfile.image : 'avatars/default_profile.jpg') : 'avatars/default_profile.jpg')"
               alt="Header Avatar"
               width="120"
               height="120"
@@ -756,6 +757,8 @@ function loading() {
               <div class="row mt-5">
                 <div class="column">
                   <p>Nama</p>
+                  <p>Lulusan</p>
+                  <p>Bidang Profesi</p>
                   <p>Pengalaman</p>
                   <p>Tempat Praktik</p>
                   <p>Nomor STR</p>
@@ -765,14 +768,18 @@ function loading() {
                   <p>:</p>
                   <p>:</p>
                   <p>:</p>
+                  <p>:</p>
+                  <p>:</p>
                 </div>
                 <div
                   class="column"
                   style="color:black;"
                 >
-                  <p>{{ dataProfile ? dataProfile.first_name + " " + dataProfile.last_name + " " + dataProfile.degree : "nama" }}</p>
-                  <p>{{ dataProfile ? dataProfile.years_experience + " " + "Tahun" : "tahun" }}</p>
-                  <p>{{ dataProfile ? dataProfile.workplace + " " : "tempat" }}</p>
+                  <p>{{ dataProfile ? dataProfile.full_name : "nama" }}</p>
+                  <p>{{ dataProfile ? dataProfile.graduation_university : "univ" }}</p>
+                  <p>{{ dataProfile ? dataProfile.speciality : "bidang" }}</p>
+                  <p>{{ dataProfile ? (date.year() - dataProfile.graduation_year > 0 ? date.year() - dataProfile.graduation_year : "kurang dari 1") + " tahun" : "tahun" }}</p>
+                  <p>{{ dataProfile ? dataProfile.city + ", " + dataProfile.province : "tempat" }}</p>
                   <p>{{ dataProfile ? dataProfile.str_number + " " : "str" }}</p>
                 </div>
               </div>

@@ -12,6 +12,8 @@ import i18n from './i18n'
 import store from './store'
 import "@/assets/scss/app.scss"
 import VueScreen from 'vue-screen'
+import Croppa from 'vue-croppa'
+import 'vue-croppa/dist/vue-croppa.css'
 
 const options = {
   name: '_blank',
@@ -40,6 +42,7 @@ Vue.use(Notification);
 Vue.use(require('vue-chartist'));
 Vue.component('apexchart', VueApexCharts);
 Vue.use(VueScreen);
+Vue.use(Croppa);
 
 new Vue({
   router,

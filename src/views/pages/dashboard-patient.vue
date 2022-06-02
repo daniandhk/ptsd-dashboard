@@ -2,7 +2,7 @@
 import store from '@/store';
 import { notificationMethods } from "@/state/helpers";
 import * as api from '@/api';
-import Topbar from "@/components/topbar-patient";
+import Topbar from "@/components/topbar";
 import ConfirmEmail from "@/views/pages/auth/confirm-email";
 import SetupProfile from "@/views/pages/auth/setup-profile";
 import SetupGuardian from "@/views/pages/auth/setup-guardian";
@@ -70,7 +70,7 @@ export default {
 
 <template>
   <div>
-    <Topbar />
+    <Topbar :is-resizeable="false" />
     <div
       v-if="viewEmail || viewProfile || viewGuardian"
       class="popup-body"
