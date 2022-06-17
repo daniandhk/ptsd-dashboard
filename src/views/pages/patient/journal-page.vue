@@ -26,7 +26,7 @@ export default {
       date: moment().format('YYYY-MM-DD'),
       dashboard: {
           journal: null,
-          note_question: [],
+          note_questions: [],
       },
 
       isJournalNull: false,
@@ -87,7 +87,7 @@ export default {
         //emptying
         this.dashboard = {
             journal: null,
-            note_question: [],
+            note_questions: [],
         }
         this.dataNotes = []
         this.data_journal = {
@@ -133,9 +133,9 @@ export default {
                 this.isJournalNull = true;
             }
 
-            if(this.dashboard.note_question){
-                this.dataNotes = this.dashboard.note_question
-                this.perPage = this.dashboard.note_question.length
+            if(this.dashboard.note_questions){
+                this.dataNotes = this.dashboard.note_questions
+                this.perPage = this.dashboard.note_questions.length
             }
         }
     },
@@ -227,7 +227,7 @@ export default {
     },
 
     isNoteAnswered(data){
-        if(data.note_answer.length > 0){
+        if(data.note_answers.length > 0){
             return true
         }
         else{

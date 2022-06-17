@@ -10,6 +10,8 @@ export default {
     return {
         test_type: this.$route.params.test_type,
         test: "",
+
+        isLoading: true,
     };
   },
   computed: {
@@ -38,14 +40,15 @@ export default {
 
     checkAuth(){
         loading();
+        this.isLoading = true;
         const params = this.getRequestParams(
             this.test_type,
         );
         return api.getTestTypes(params)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
-                if(response.data.data.length > 0){
-                    this.test = response.data.data[0]
+                if(response.data.data){
+                    this.test = response.data.data
                 }
                 else{
                     this.$router.replace({
@@ -53,9 +56,12 @@ export default {
                     });
                 }
                 loading();
+                this.isLoading = false;
             })
             .catch(error => {
                 loading();
+                this.isLoading = false;
+
                 this.$router.replace({
                     name: 'error-404'
                 });
@@ -102,11 +108,13 @@ function loading() {
       />
     </div>
     <div
-      style="min-height: 100vh; display: flex; background-color: #005C9A;"
+      id="main-page"
+      style="max-width:820px; min-height: 100vh; display: flex; background-color: #005C9A;"
     >
       <div
+        v-if="!isLoading"
         class="card h-100 m-5"
-        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
+        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 18px; display: flex; justify-content: center; align-items: center;"
       >
         <div class="card-body">
           <div class="text-center form-group mb-0">
@@ -144,10 +152,7 @@ function loading() {
                       class="card h-100"
                       style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
                     >
-                      <div
-                        class="card-body"
-                        style="min-width:260px; max-width:450px"
-                      >
+                      <div class="card-body">
                         <div style="color:black;">
                           <p class="mb-4">
                             Tes penilaian diri PTSD dilakukan untuk mengukur tingkat keparahan gejala PTSD selama <b>{{ test.delay_days }} HARI</b> terakhir.
@@ -162,22 +167,26 @@ function loading() {
                       </div>
                     </div>
                     <div
-                      class="mt-4 text-center form-group"
+                      class="row mt-4 text-center"
                     >
-                      <button
-                        class="btn btn-secondary w-md waves-effect waves-light m-1"
-                        style="width:180px"
-                        @click="onBackButtonClick()"
-                      >
-                        Kembali
-                      </button>
-                      <button
-                        class="btn btn-primary w-md waves-effect waves-light m-1"
-                        style="background-color:#005C9A; width:260px"
-                        @click="onStartButtonClick()"
-                      >
-                        Mulai
-                      </button>
+                      <div class="col-md-4 pt-1 pb-1">
+                        <button
+                          class="btn btn-secondary w-md waves-effect waves-light"
+                          style="width:100%;"
+                          @click="onBackButtonClick()"
+                        >
+                          Kembali
+                        </button>
+                      </div>
+                      <div class="col-md-8 pt-1 pb-1">
+                        <button
+                          class="btn btn-primary w-md waves-effect waves-light"
+                          style="background-color:#005C9A; width:100%;"
+                          @click="onStartButtonClick()"
+                        >
+                          Mulai
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -189,3 +198,11 @@ function loading() {
     </div>
   </div>
 </template>
+
+<style scoped>
+  @media only screen and (min-width: 820px) { 
+  #main-page { 
+    width: 820px; 
+  } 
+}
+</style>

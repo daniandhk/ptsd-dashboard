@@ -19,7 +19,6 @@ export default {
       schedules: [
         {
             day: "Senin",
-            index_day: 0,
             time_start: "",
             time_end: ""
         },
@@ -146,7 +145,6 @@ export default {
     addDay(){
       let data = {
         day: "",
-        index_day: null,
         time_start: "",
         time_end: "",
       }
@@ -171,7 +169,6 @@ export default {
     changedDay(data, index){
       if(data){
         this.schedules[index].day = data.day;
-        this.schedules[index].index_day = data.idx;
 
         this.schedules.forEach((element, index, array) => {
           let getIndex = this.data_day.findIndex(x => x.day === data.day);
@@ -182,7 +179,6 @@ export default {
       }
       else{
         this.schedules[index].day = "";
-        this.schedules[index].index_day = null;
       }
     },
 
@@ -249,7 +245,7 @@ function loading() {
     <div style="min-height: 100%; display: flex;">
       <div
         class="card h-100 m-5"
-        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
+        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 18px; display: flex; justify-content: center; align-items: center;"
       >
         <div class="card-body">
           <div class="text-center form-group mb-0">
@@ -287,7 +283,10 @@ function loading() {
                     class="card-title-desc"
                     style="font-size: 14px; margin: 0 !important;"
                   >
-                    - Jadwal Chat akan digunakan untuk status online Anda,<br>
+                    - Jadwal Chat akan digunakan untuk <b>status online</b> Anda,<br>
+                    - Status online digunakan saat pasien memilih psikolog di menu konsultasi,<br>
+                    - Status Anda akan <b>OFFLINE</b> diluar Jadwal Chat Anda,<br>
+                    - Status online <b>TIDAK AKAN</b> berubah walaupun Anda sedang membuka web,<br>
                     - Jadwal Chat dapat diubah kapan saja.<br>
                   </p>
                 </div>

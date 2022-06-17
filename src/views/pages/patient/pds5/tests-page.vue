@@ -11,93 +11,99 @@ export default {
   components: {
     //
   },
+  props: {
+    isReview: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
-        test_type: this.$route.params.test_type,
+      test_type: this.$route.params.test_type,
 
-        patient_id: store.getters.getLoggedUser.profile.id,
-        pageNumber: 1,
-        testData: tests,
-        textData: texts,
-        data_trauma: {
-          data1: [],
-          data2: "",
+      patient_id: store.getters.getLoggedUser.profile.id,
+      pageNumber: 1,
+      testData: tests,
+      textData: texts,
+      data_trauma: {
+        data1: [],
+        data2: "",
+      },
+      data_trauma_lain: {
+        data1: "",
+        data2: "",
+      },
+      isTraumaLainSelected: false,
+      isTraumaLainSelected2: false,
+      form_style: {
+        backgroundColor: "#F0F4F6",
+      },
+      form_style2: {
+        backgroundColor: "#F0F4F6",
+      },
+      data_diagnosa: {
+        data1: [],
+        data2: [],
+        data3: [],
+      },
+      data_symptom: [],
+      data_input: [
+        {
+          type: "trauma",
+          answers: [],
         },
-        data_trauma_lain: {
-          data1: "",
-          data2: "",
+        {
+          type: "diagnosa",
+          answers: [],
         },
-        isTraumaLainSelected: false,
-        isTraumaLainSelected2: false,
-        form_style: {
-          backgroundColor: "#F0F4F6",
+        {
+          type: "symptom",
+          answers: [],
         },
-        form_style2: {
-          backgroundColor: "#F0F4F6",
-        },
-        data_diagnosa: {
-          data1: [],
-          data2: [],
-          data3: [],
-        },
-        data_symptom: [],
-        data_input: [
-          {
-            type: "trauma",
-            answers: [],
-          },
-          {
-            type: "diagnosa",
-            answers: [],
-          },
-          {
-            type: "symptom",
-            answers: [],
-          },
-        ],
+      ],
 
-        answers_diagnosa: [
-          {
-            value: "0",
-            text: "Tidak sama sekali",
-          },
-          {
-            value: "1",
-            text: "Sekali seminggu atau kurang / sedikit",
-          },
-          {
-            value: "2",
-            text: "2 hingga 3 kali seminggu / agak banyak",
-          },
-          {
-            value: "3",
-            text: "4 hingga 5 kali seminggu / sangat banyak",
-          },
-          {
-            value: "4",
-            text: "6 kali atau lebih dalam seminggu / parah",
-          },
-        ],
+      answers_diagnosa: [
+        {
+          value: "0",
+          text: "Tidak sama sekali",
+        },
+        {
+          value: "1",
+          text: "Sekali seminggu atau kurang / sedikit",
+        },
+        {
+          value: "2",
+          text: "2 hingga 3 kali seminggu / agak banyak",
+        },
+        {
+          value: "3",
+          text: "4 hingga 5 kali seminggu / sangat banyak",
+        },
+        {
+          value: "4",
+          text: "6 kali atau lebih dalam seminggu / parah",
+        },
+      ],
 
-        answers_symptom: [
-          {
-            value: "a",
-            text: "Kurang dari 6 bulan",
-          },
-          {
-            value: "b",
-            text: "Lebih dari 6 bulan",
-          },
-        ],
+      answers_symptom: [
+        {
+          value: "a",
+          text: "Kurang dari 6 bulan",
+        },
+        {
+          value: "b",
+          text: "Lebih dari 6 bulan",
+        },
+      ],
 
-        submitted_trauma1: false,
-        submitted_trauma2: false,
-        submitted_diagnosa1: false,
-        submitted_diagnosa2: false,
-        submitted_final: false,
+      submitted_trauma1: false,
+      submitted_trauma2: false,
+      submitted_diagnosa1: false,
+      submitted_diagnosa2: false,
+      submitted_final: false,
 
-        data_example: "1",
-        trauma_selected: "",
+      data_example: "1",
+      trauma_selected: "",
     };
   },
   computed: {
@@ -161,183 +167,184 @@ export default {
     },
 
     checkAuth(){
-        loading();
-        const params = this.getRequestParams(
-            this.test_type,
-        );
-        return api.getTestTypes(params)
-            // eslint-disable-next-line no-unused-vars
-            .then(response => {
-                if(response.data.data.length > 0){
-                    this.test = response.data.data[0]
-                }
-                else{
-                    this.$router.replace({
-                        name: 'error-404'
-                    });
-                }
-                loading();
-            })
-            .catch(error => {
-                loading();
-                this.$router.replace({
-                    name: 'error-404'
-                });
-            })
+      loading();
+      const params = this.getRequestParams(
+        this.test_type,
+      );
+      return api.getTestTypes(params)
+        // eslint-disable-next-line no-unused-vars
+        .then(response => {
+          if(response.data.data){
+            this.test = response.data.data
+          }
+          else{
+            this.$router.replace({
+              name: 'error-404'
+            });
+          }
+          loading();
+        })
+        .catch(error => {
+          loading();
+          this.$router.replace({
+            name: 'error-404'
+          });
+        })
     },
 
     onCancelButtonClick(){
       Swal.fire({
-          title: "Anda yakin?",
-          text: "Tes ini akan dibatalkan.",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#005C9A",
-          cancelButtonColor: "#f46a6a",
-          confirmButtonText: "Ya, batalkan!"
+        title: "Anda yakin?",
+        text: "Tes ini akan dibatalkan.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#005C9A",
+        cancelButtonColor: "#f46a6a",
+        confirmButtonText: "Ya, batalkan!"
       }).then(result => {
-          if (result.value) {
-              this.$router.push({name: 'home'});
-              Swal.fire("Berhasil dibatalkan!", "Anda telah kembali ke menu utama.", "success");
-          }
+        if (result.value) {
+          this.$router.push({name: 'home'});
+          Swal.fire("Berhasil dibatalkan!", "Anda telah kembali ke menu utama.", "success");
+        }
       });
     },
 
     onNextButtonClick(page, isNext){
-      if(isNext){
-        if(this.pageNumber == 1){
-          this.submitted_trauma1 = true;
-          this.$v.data_trauma.data1.$touch();
-          this.$v.data_trauma_lain.data1.$touch();
+      console.log(this.data_trauma.data1)
+      // if(isNext){
+      //   if(this.pageNumber == 1){
+      //     this.submitted_trauma1 = true;
+      //     this.$v.data_trauma.data1.$touch();
+      //     this.$v.data_trauma_lain.data1.$touch();
 
-          if (this.$v.data_trauma.data1.$invalid || (this.$v.data_trauma_lain.data1.$invalid && this.isTraumaLainSelected)) {
-            if (this.$v.data_trauma.data1.$invalid){
-              window.scrollTo(0,document.body.scrollHeight);
-            }
-            return;
-          }
-          else{
-            if(this.data_trauma.data1.includes("none")){
-              this.onCancelButtonClick()
-              return
-            }
-            else{
-              this.data_input[0].answers = []
+      //     if (this.$v.data_trauma.data1.$invalid || (this.$v.data_trauma_lain.data1.$invalid && this.isTraumaLainSelected)) {
+      //       if (this.$v.data_trauma.data1.$invalid){
+      //         window.scrollTo(0,document.body.scrollHeight);
+      //       }
+      //       return;
+      //     }
+      //     else{
+      //       if(this.data_trauma.data1.includes("none")){
+      //         this.onCancelButtonClick()
+      //         return
+      //       }
+      //       else{
+      //         this.data_input[0].answers = []
 
-              this.data_trauma.data1.forEach((element, index, array) => {
-                  if(this.testData.trauma.answers.includes(element)){
-                    this.createAnswerData("trauma", 1, element)
-                  }
-              });
+      //         this.data_trauma.data1.forEach((element, index, array) => {
+      //           if(this.testData.trauma.answers.includes(element)){
+      //             this.createAnswerData("trauma", 1, element)
+      //           }
+      //         });
               
-              if(this.data_trauma.data1.includes("lain")){
-                this.createAnswerData("trauma", 1, this.data_trauma_lain.data1)
-              }
-            }
-          }
-        }
-        if(this.pageNumber == 2){
-          this.submitted_trauma2 = true;
-          this.$v.data_trauma.data2.$touch();
-          this.$v.data_trauma_lain.data2.$touch();
+      //         if(this.data_trauma.data1.includes("lain")){
+      //           this.createAnswerData("trauma", 1, this.data_trauma_lain.data1)
+      //         }
+      //       }
+      //     }
+      //   }
+      //   if(this.pageNumber == 2){
+      //     this.submitted_trauma2 = true;
+      //     this.$v.data_trauma.data2.$touch();
+      //     this.$v.data_trauma_lain.data2.$touch();
 
-          if (this.$v.data_trauma.data2.$invalid || (this.$v.data_trauma_lain.data2.$invalid && this.isTraumaLainSelected2)) {
-            if (this.$v.data_trauma.data2.$invalid){
-              window.scrollTo(0,document.body.scrollHeight);
-            }
-            return;
-          }
-          else{
-            let data = this.data_input[0].answers.find(e => e.index === 2)
-            if (data) {
-              this.data_input[0].answers.splice(this.data_input[0].answers.indexOf(data), 1);
-            }
+      //     if (this.$v.data_trauma.data2.$invalid || (this.$v.data_trauma_lain.data2.$invalid && this.isTraumaLainSelected2)) {
+      //       if (this.$v.data_trauma.data2.$invalid){
+      //         window.scrollTo(0,document.body.scrollHeight);
+      //       }
+      //       return;
+      //     }
+      //     else{
+      //       let data = this.data_input[0].answers.find(e => e.index === 2)
+      //       if (data) {
+      //         this.data_input[0].answers.splice(this.data_input[0].answers.indexOf(data), 1);
+      //       }
 
-            if(this.data_trauma.data2 == "lain"){
-              this.createAnswerData("trauma", 2, this.data_trauma_lain.data2)
-            }
-            else{
-              this.createAnswerData("trauma", 2, this.data_trauma.data2)
-            }
-          }
-          let data = this.data_input[0].answers.find(e => e.index === 2)
-          this.trauma_selected = data.resp
+      //       if(this.data_trauma.data2 == "lain"){
+      //         this.createAnswerData("trauma", 2, this.data_trauma_lain.data2)
+      //       }
+      //       else{
+      //         this.createAnswerData("trauma", 2, this.data_trauma.data2)
+      //       }
+      //     }
+      //     let data = this.data_input[0].answers.find(e => e.index === 2)
+      //     this.trauma_selected = data.resp
 
-          this.testData.diagnosa.questions[0].forEach((element, index, array) => {
-              let data = {
-                index: index+1,
-                answer: ""
-              }
-              let find = this.data_diagnosa.data1.find(e => e.index === data.index)
-              if (!find) {
-                this.data_diagnosa.data1.push(data)
-              }
-          });
-        }
-        if(this.pageNumber == 3){
-          this.submitted_diagnosa1 = true;
-          this.$v.data_diagnosa.data1.$touch();
+      //     this.testData.diagnosa.questions[0].forEach((element, index, array) => {
+      //       let data = {
+      //         index: index+1,
+      //         answer: ""
+      //       }
+      //       let find = this.data_diagnosa.data1.find(e => e.index === data.index)
+      //       if (!find) {
+      //         this.data_diagnosa.data1.push(data)
+      //       }
+      //     });
+      //   }
+      //   if(this.pageNumber == 3){
+      //     this.submitted_diagnosa1 = true;
+      //     this.$v.data_diagnosa.data1.$touch();
 
-          if (this.$v.data_diagnosa.data1.$invalid) {
-            window.scrollTo(0,document.body.scrollHeight);
-            return;
-          }
-          else{
-            this.data_diagnosa.data1.forEach((element, index, array) => {
-                this.createAnswerData("diagnosa", element.index, element.answer)
-            });
-          }
+      //     if (this.$v.data_diagnosa.data1.$invalid) {
+      //       window.scrollTo(0,document.body.scrollHeight);
+      //       return;
+      //     }
+      //     else{
+      //       this.data_diagnosa.data1.forEach((element, index, array) => {
+      //         this.createAnswerData("diagnosa", element.index, element.answer)
+      //       });
+      //     }
 
-          this.testData.diagnosa.questions[1].forEach((element, index, array) => {
-              let data = {
-                index: index+11,
-                answer: ""
-              }
-              let find = this.data_diagnosa.data2.find(e => e.index === data.index)
-              if (!find) {
-                this.data_diagnosa.data2.push(data)
-              }
-          });
-        }
-        if(this.pageNumber == 4){
-          this.submitted_diagnosa2 = true;
-          this.$v.data_diagnosa.data2.$touch();
+      //     this.testData.diagnosa.questions[1].forEach((element, index, array) => {
+      //       let data = {
+      //         index: index+11,
+      //         answer: ""
+      //       }
+      //       let find = this.data_diagnosa.data2.find(e => e.index === data.index)
+      //       if (!find) {
+      //         this.data_diagnosa.data2.push(data)
+      //       }
+      //     });
+      //   }
+      //   if(this.pageNumber == 4){
+      //     this.submitted_diagnosa2 = true;
+      //     this.$v.data_diagnosa.data2.$touch();
 
-          if (this.$v.data_diagnosa.data2.$invalid) {
-            window.scrollTo(0,document.body.scrollHeight);
-            return;
-          }
-          else{
-            this.data_diagnosa.data2.forEach((element, index, array) => {
-                this.createAnswerData("diagnosa", element.index, element.answer)
-            });
-          }
+      //     if (this.$v.data_diagnosa.data2.$invalid) {
+      //       window.scrollTo(0,document.body.scrollHeight);
+      //       return;
+      //     }
+      //     else{
+      //       this.data_diagnosa.data2.forEach((element, index, array) => {
+      //         this.createAnswerData("diagnosa", element.index, element.answer)
+      //       });
+      //     }
 
-          this.testData.diagnosa.questions[2].forEach((element, index, array) => {
-              let data = {
-                index: index+21,
-                answer: ""
-              }
-              let find = this.data_diagnosa.data3.find(e => e.index === data.index)
-              if (!find) {
-                this.data_diagnosa.data3.push(data)
-              }
-          });
+      //     this.testData.diagnosa.questions[2].forEach((element, index, array) => {
+      //       let data = {
+      //         index: index+21,
+      //         answer: ""
+      //       }
+      //       let find = this.data_diagnosa.data3.find(e => e.index === data.index)
+      //       if (!find) {
+      //         this.data_diagnosa.data3.push(data)
+      //       }
+      //     });
 
-          this.testData.symptom.questions.forEach((element, index, array) => {
-              let data = {
-                index: index+1,
-                answer: ""
-              }
-              let find = this.data_symptom.find(e => e.index === data.index)
-              if (!find) {
-                this.data_symptom.push(data)
-              }
-          });
-        }
-      }
-      window.scrollTo(0,0)
-      this.pageNumber = page
+      //     this.testData.symptom.questions.forEach((element, index, array) => {
+      //       let data = {
+      //         index: index+1,
+      //         answer: ""
+      //       }
+      //       let find = this.data_symptom.find(e => e.index === data.index)
+      //       if (!find) {
+      //         this.data_symptom.push(data)
+      //       }
+      //     });
+      //   }
+      // }
+      // window.scrollTo(0,0)
+      // this.pageNumber = page
     },
 
     onFinishButtonClick(){
@@ -351,26 +358,26 @@ export default {
       }
       else{
         this.data_diagnosa.data3.forEach((element, index, array) => {
-            this.createAnswerData("distress", element.index, element.answer)
+          this.createAnswerData("distress", element.index, element.answer)
         });
 
         this.data_symptom.forEach((element, index, array) => {
-            this.createAnswerData("symptom", element.index, element.answer)
+          this.createAnswerData("symptom", element.index, element.answer)
         });
       }
       
       Swal.fire({
-          title: "Akhiri tes?",
-          text: "Harap periksa kembali jawaban Anda.",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#005C9A",
-          cancelButtonColor: "#f46a6a",
-          confirmButtonText: "Ya, akhiri tes!"
+        title: "Akhiri tes?",
+        text: "Harap periksa kembali jawaban Anda.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#005C9A",
+        cancelButtonColor: "#f46a6a",
+        confirmButtonText: "Ya, akhiri tes!"
       }).then(result => {
-          if (result.value) {
-              this.inputTest();
-          }
+        if (result.value) {
+          this.inputTest();
+        }
       });
     },
 
@@ -381,23 +388,23 @@ export default {
         test_type: this.test_type
       }
       return (
-          api.inputTest(data)
-            .then(response => {
-                Swal.fire("Tes telah berakhir!", "Jawaban Anda berhasil disimpan.", "success");
-                this.$router.replace({
-                    name: 'test-finished', 
-                    params: { test_type: this.test_type }
-                });
+        api.inputTest(data)
+          .then(response => {
+            Swal.fire("Tes telah berakhir!", "Jawaban Anda berhasil disimpan.", "success");
+            this.$router.replace({
+              name: 'test-finished', 
+              params: { test_type: this.test_type }
+            });
+          })
+          .catch(error => {
+            //pop up
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Terjadi kesalahan!',
+              footer: error.response.data.message
             })
-            .catch(error => {
-                //pop up
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Terjadi kesalahan!',
-                    footer: error.response.data.message
-                })
-            })
+          })
       );
     },
 
@@ -437,28 +444,28 @@ export default {
         resp: text
       }
       switch(type) {
-        case "trauma":{
-          this.data_input[0].answers.push(data)
-          break
+      case "trauma":{
+        this.data_input[0].answers.push(data)
+        break
+      }
+      case "diagnosa":{
+        let find = this.data_input[1].answers.find(e => e.index === index)
+        if (find) {
+          this.data_input[1].answers.splice(this.data_input[1].answers.indexOf(find), 1);
         }
-        case "diagnosa":{
-          let find = this.data_input[1].answers.find(e => e.index === index)
-          if (find) {
-            this.data_input[1].answers.splice(this.data_input[1].answers.indexOf(find), 1);
-          }
-          this.data_input[1].answers.push(data)
-          break
+        this.data_input[1].answers.push(data)
+        break
+      }
+      case "symptom":{
+        let find = this.data_input[2].answers.find(e => e.index === index)
+        if (find) {
+          this.data_input[2].answers.splice(this.data_input[2].answers.indexOf(find), 1);
         }
-        case "symptom":{
-          let find = this.data_input[2].answers.find(e => e.index === index)
-          if (find) {
-            this.data_input[2].answers.splice(this.data_input[2].answers.indexOf(find), 1);
-          }
-          this.data_input[2].answers.push(data)
-          break
-        }
-        default:
-          break
+        this.data_input[2].answers.push(data)
+        break
+      }
+      default:
+        break
       }
     }
   }
@@ -507,7 +514,7 @@ function loading() {
         >
           <input
             v-model="data_trauma.data1"
-            type="checkbox"
+            type="radio"
             name="answer_text"
             :value="answer"
             style="vertical-align: middle; float: left; margin-top:5px;"
@@ -520,7 +527,7 @@ function loading() {
         <div class="mt-4">
           <input
             v-model="data_trauma.data1"
-            type="checkbox"
+            type="radio"
             name="answer_text"
             value="lain"
             style="vertical-align: middle; float: left; margin-top:5px;"
@@ -535,7 +542,7 @@ function loading() {
           >
             <input
               id="a"
-              type="checkbox"
+              type="radio"
               name="a"
               value="a"
               style="vertical-align: middle; float: left; margin-top:5px; visibility: hidden;"
@@ -561,7 +568,7 @@ function loading() {
         </div>
         <input
           v-model="data_trauma.data1"
-          type="checkbox"
+          type="radio"
           name="answer_text"
           value="none"
           style="vertical-align: middle; float: left; margin-top:5px;"
@@ -585,23 +592,27 @@ function loading() {
       </div>
 
       <div
-        class="mt-4 text-center form-group"
+        class="row mt-5 text-center form-group"
         :class="{ 'is-invalid': submitted_trauma1 && $v.data_trauma.data1.$error }"
       >
-        <button
-          class="btn btn-danger w-md waves-effect waves-light m-1"
-          style="width:180px"
-          @click="onCancelButtonClick()"
-        >
-          Batalkan
-        </button>
-        <button
-          class="btn btn-primary w-md waves-effect waves-light m-1"
-          style="background-color:#005C9A; width:260px"
-          @click="onNextButtonClick(2, true)"
-        >
-          Berikutnya
-        </button>
+        <div class="col-md-4 pt-1 pb-1">
+          <button
+            class="btn btn-danger w-md waves-effect waves-light"
+            style="width:100%"
+            @click="onCancelButtonClick()"
+          >
+            Batalkan
+          </button>
+        </div>
+        <div class="col-md-8 pt-1 pb-1">
+          <button
+            class="btn btn-primary w-md waves-effect waves-light"
+            style="background-color:#005C9A; width:100%"
+            @click="onNextButtonClick(2, true)"
+          >
+            Berikutnya
+          </button>
+        </div>
       </div>
       <div 
         v-if="submitted_trauma1 && !$v.data_trauma.data1.required" 
@@ -696,23 +707,27 @@ function loading() {
       </div>
 
       <div
-        class="mt-4 text-center form-group"
+        class="row mt-5 text-center form-group"
         :class="{ 'is-invalid': submitted_trauma2 && $v.data_trauma.data2.$error }"
       >
-        <button
-          class="btn btn-secondary w-md waves-effect waves-light m-1"
-          style="width:180px"
-          @click="onNextButtonClick(1, false)"
-        >
-          Sebelumnya
-        </button>
-        <button
-          class="btn btn-primary w-md waves-effect waves-light m-1"
-          style="background-color:#005C9A; width:260px"
-          @click="onNextButtonClick(3, true)"
-        >
-          Berikutnya
-        </button>
+        <div class="col-md-4 pt-1 pb-1">
+          <button
+            class="btn btn-secondary w-md waves-effect waves-light"
+            style="width:100%"
+            @click="onNextButtonClick(1, false)"
+          >
+            Sebelumnya
+          </button>
+        </div>
+        <div class="col-md-8 pt-1 pb-1">
+          <button
+            class="btn btn-primary w-md waves-effect waves-light"
+            style="background-color:#005C9A; width:100%"
+            @click="onNextButtonClick(3, true)"
+          >
+            Berikutnya
+          </button>
+        </div>
       </div>
       <div 
         v-if="submitted_trauma2 && !$v.data_trauma.data2.required" 
@@ -874,23 +889,27 @@ function loading() {
       </div>
 
       <div
-        class="mt-4 text-center form-group"
+        class="row mt-5 text-center form-group"
         :class="{ 'is-invalid': submitted_diagnosa1 && $v.data_diagnosa.data1.$invalid }"
       >
-        <button
-          class="btn btn-secondary w-md waves-effect waves-light m-1"
-          style="width:180px"
-          @click="onNextButtonClick(2, false)"
-        >
-          Sebelumnya
-        </button>
-        <button
-          class="btn btn-primary w-md waves-effect waves-light m-1"
-          style="background-color:#005C9A; width:260px"
-          @click="onNextButtonClick(4, true)"
-        >
-          Berikutnya
-        </button>
+        <div class="col-md-4 pt-1 pb-1">
+          <button
+            class="btn btn-secondary w-md waves-effect waves-light"
+            style="width:100%"
+            @click="onNextButtonClick(2, false)"
+          >
+            Sebelumnya
+          </button>
+        </div>
+        <div class="col-md-8 pt-1 pb-1">
+          <button
+            class="btn btn-primary w-md waves-effect waves-light"
+            style="background-color:#005C9A; width:100%"
+            @click="onNextButtonClick(4, true)"
+          >
+            Berikutnya
+          </button>
+        </div>
       </div>
       <div 
         v-if="submitted_diagnosa1 && $v.data_diagnosa.data1.$invalid" 
@@ -981,23 +1000,27 @@ function loading() {
       </div>
 
       <div
-        class="mt-4 text-center form-group"
+        class="row mt-5 text-center form-group"
         :class="{ 'is-invalid': submitted_diagnosa2 && $v.data_diagnosa.data2.$invalid }"
       >
-        <button
-          class="btn btn-secondary w-md waves-effect waves-light m-1"
-          style="width:180px"
-          @click="onNextButtonClick(3, false)"
-        >
-          Sebelumnya
-        </button>
-        <button
-          class="btn btn-primary w-md waves-effect waves-light m-1"
-          style="background-color:#005C9A; width:260px"
-          @click="onNextButtonClick(5, true)"
-        >
-          Berikutnya
-        </button>
+        <div class="col-md-4 pt-1 pb-1">
+          <button
+            class="btn btn-secondary w-md waves-effect waves-light"
+            style="width:100%"
+            @click="onNextButtonClick(3, false)"
+          >
+            Sebelumnya
+          </button>
+        </div>
+        <div class="col-md-8 pt-1 pb-1">
+          <button
+            class="btn btn-primary w-md waves-effect waves-light"
+            style="background-color:#005C9A; width:100%"
+            @click="onNextButtonClick(5, true)"
+          >
+            Berikutnya
+          </button>
+        </div>
       </div>
       <div 
         v-if="submitted_diagnosa2 && $v.data_diagnosa.data2.$invalid" 
@@ -1146,23 +1169,27 @@ function loading() {
       </div>
 
       <div
-        class="mt-4 text-center form-group"
+        class="row mt-5 text-center form-group"
         :class="{ 'is-invalid': submitted_final && ($v.data_diagnosa.data3.$invalid || $v.data_symptom.$invalid) }"
       >
-        <button
-          class="btn btn-secondary w-md waves-effect waves-light m-1"
-          style="width:180px"
-          @click="onNextButtonClick(4, false)"
-        >
-          Sebelumnya
-        </button>
-        <button
-          class="btn btn-success w-md waves-effect waves-light m-1"
-          style="width:260px"
-          @click="onFinishButtonClick()"
-        >
-          Selesai
-        </button>
+        <div class="col-md-4 pt-1 pb-1">
+          <button
+            class="btn btn-secondary w-md waves-effect waves-light"
+            style="width:100%"
+            @click="onNextButtonClick(4, false)"
+          >
+            Sebelumnya
+          </button>
+        </div>
+        <div class="col-md-8 pt-1 pb-1">
+          <button
+            class="btn btn-success w-md waves-effect waves-light"
+            style="width:100%"
+            @click="onFinishButtonClick()"
+          >
+            Selesai
+          </button>
+        </div>
       </div>
       <div 
         v-if="submitted_final && ($v.data_diagnosa.data3.$invalid || $v.data_symptom.$invalid)" 

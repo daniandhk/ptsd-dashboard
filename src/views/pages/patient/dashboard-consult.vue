@@ -651,14 +651,26 @@ function loading() {
                                       • Offline
                                     </div>
                                   </div>
-                                  <hr class="my-2">
+                                  <hr class="mt-2 mb-3">
                                   <div
                                     class="text-center d-flex"
                                     style="height:28.9px; align-items: center; justify-content: center;"
                                   >
-                                    <div class="font-size-12">
+                                    <div
+                                      v-if="dashboard.psychologists.total_data > 6"
+                                      class="font-size-12"
+                                    >
                                       Jadwal berikutnya: {{ getDate(psychologist) ? getDate(psychologist).day + ", " + formatDate(getDate(psychologist).time_start, 'jam') + "-" + formatDate(getDate(psychologist).time_end, 'jam') : "-" }}
                                     </div>
+                                    <button
+                                      v-else
+                                      type="button"
+                                      class="btn btn-primary btn-sm"
+                                      style="min-width:100%;"
+                                      @click.stop.prevent="onPilihButtonClick(psychologist)"
+                                    >
+                                      Pilih
+                                    </button>
                                   </div>
                                 </div>
                               </div>

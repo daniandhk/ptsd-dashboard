@@ -10,6 +10,8 @@ export default {
     return {
         test_type: this.$route.params.test_type,
         test: "",
+
+        isLoading: true,
     };
   },
   computed: {
@@ -38,14 +40,16 @@ export default {
 
     checkAuth(){
         loading();
+        this.isLoading = true;
+
         const params = this.getRequestParams(
             this.test_type,
         );
         return api.getTestTypes(params)
             // eslint-disable-next-line no-unused-vars
             .then(response => {
-                if(response.data.data.length > 0){
-                    this.test = response.data.data[0]
+                if(response.data.data){
+                    this.test = response.data.data
                 }
                 else{
                     this.$router.replace({
@@ -53,9 +57,12 @@ export default {
                     });
                 }
                 loading();
+                this.isLoading = false;
             })
             .catch(error => {
                 loading();
+                this.isLoading = false;
+
                 this.$router.replace({
                     name: 'error-404'
                 });
@@ -95,11 +102,13 @@ function loading() {
       />
     </div>
     <div
-      style="min-height: 100vh; display: flex; background-color: #005C9A;"
+      id="main-page"
+      style="max-width:820px; min-height: 100vh; display: flex; background-color: #005C9A;"
     >
       <div
+        v-if="!isLoading"
         class="card h-100 m-5"
-        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
+        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 18px; display: flex; justify-content: center; align-items: center;"
       >
         <div class="card-body">
           <div class="text-center form-group mb-0">
@@ -137,10 +146,7 @@ function loading() {
                       class="card h-100"
                       style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
                     >
-                      <div
-                        class="card-body"
-                        style="min-width:260px; max-width:600px"
-                      >
+                      <div class="card-body">
                         <div style="color:black;">
                           <p class="mb-4">
                             <b style="font-size:20px">Tes telah berakhir!</b><br>Jawaban Anda berhasil disimpan.
@@ -153,15 +159,17 @@ function loading() {
                     </div>
 
                     <div
-                      class="mt-4 text-center form-group"
+                      class="row mt-4 text-center form-group"
                     >
-                      <button
-                        class="btn btn-primary w-md waves-effect waves-light m-1"
-                        style="background-color:#005C9A; min-width:100%;"
-                        @click="onFinishButtonClick()"
-                      >
-                        Selesai
-                      </button>
+                      <div class="col-12 pt-1 pb-1">
+                        <button
+                          class="btn btn-primary w-md waves-effect waves-light"
+                          style="background-color:#005C9A; min-width:100%;"
+                          @click="onFinishButtonClick()"
+                        >
+                          Selesai
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -173,3 +181,11 @@ function loading() {
     </div>
   </div>
 </template>
+
+<style scoped>
+  @media only screen and (min-width: 820px) { 
+  #main-page { 
+    width: 820px; 
+  } 
+}
+</style>

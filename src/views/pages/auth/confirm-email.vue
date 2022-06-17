@@ -93,7 +93,7 @@ function loading() {
     <div style="min-height: 100%; display: flex;">
       <div
         class="card h-100 m-5"
-        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 30px; display: flex; justify-content: center; align-items: center;"
+        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 18px; display: flex; justify-content: center; align-items: center;"
       >
         <div class="card-body">
           <div class="text-center form-group mb-0">

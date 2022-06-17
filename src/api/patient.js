@@ -2,7 +2,7 @@ import httpAxios from '@/httpAxios.js';
 
 export function inputTest(data){
     return httpAxios({
-        url: '/test',
+        url: '/test/storePatientAnswers',
         method: 'POST',
         data: data
     })

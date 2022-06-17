@@ -20,16 +20,17 @@ export default [
         name: 'test-start',
         meta: {
             authRequired: true,
-            beforeResolve(routeTo, routeFrom, next) {
-                if(routeFrom.name != "test-landing"){
-                    next({ name: 'test-landing', params: { test_type: this.$route.params.test_type } })
-                }
-                else{
-                    next()
-                }
-            },
+            // beforeResolve(routeTo, routeFrom, next) {
+            //     console.log(routeFrom)
+            //     if(routeFrom.name == "test-landing"){
+            //         next()
+            //     }
+            //     else{
+            //         next({ name: 'home' })
+            //     }
+            // },
         },
-        component: () => import('../../views/pages/patient/test/index')
+        component: () => import('../../views/pages/patient/test/tests-page')
     },
     {
         path: '/test/:test_type/finished',      
@@ -53,7 +54,7 @@ export default [
         meta: {
             authRequired: true,
         },
-        component: () => import('../../views/pages/patient/test/index')
+        component: () => import('../../views/pages/patient/test/tests-page')
     },
     {
         path: '/journal',      
