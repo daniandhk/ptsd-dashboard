@@ -5,10 +5,11 @@ import { required } from "vuelidate/lib/validators";
 import Swal from "sweetalert2";
 import store from '@/store';
 import moment from 'moment';
+import DatePicker from "vue2-datepicker";
 
 export default {
   components: {
-    //
+    DatePicker
   },
   data() {
     return {
@@ -56,8 +57,18 @@ export default {
         image: "",
         city: "",
         province: "",
+      },
 
-      }
+      text: {
+        tanggal: 'Jadwal',
+        link: 'Tautan / Link'
+      },
+
+      isPsychologist: false,
+      disabled_bg: {
+        backgroundColor: "#F0F4F6",
+      },
+      submitted_videocall: false,
     };
   },
   computed: {
@@ -89,6 +100,11 @@ export default {
         }
       }
     },
+
+    test_review: {
+      videocall_date: { required },
+      videocall_link: { required },
+    }
   },
   mounted: async function() {
     await this.loadData();
@@ -110,7 +126,7 @@ export default {
       if(this.isReview){
         await this.getAnswers();
         await this.convertAnswers();
-        this.patient = this.test_review.patient;
+        await this.setReviewData();
       }
     },
 
@@ -120,6 +136,22 @@ export default {
 
     dateFormatted(string){
       return moment(string).locale('id').format('DD MMMM YYYY')
+    },
+
+    setReviewData(){
+      this.patient = this.test_review.patient;
+        
+      if(this.user.role == 'patient'){
+        if(this.test_review.videocall_link == null){
+          this.test_review.videocall_link = '-'
+        }
+        if(this.test_review.videocall_date == null){
+          this.test_review.videocall_date = '-'
+        }
+        else{
+          this.test_review.videocall_date = this.dateFormatted(this.test_review.videocall_date)
+        }
+      }
     },
 
     getRequestParams(test_type) {
@@ -196,6 +228,14 @@ export default {
             name: 'error-404'
           });
         }
+      }
+      if(this.user.role == 'psychologist'){
+        this.isPsychologist = true;
+        this.disabled_bg.backgroundColor = "";
+      }
+      else{
+        this.isPsychologist = false;
+        this.disabled_bg.backgroundColor = "#F0F4F6";
       }
       return api.showTest(this.test_id)
         // eslint-disable-next-line no-unused-vars
@@ -348,6 +388,36 @@ export default {
       );
     },
 
+    onUpdateVideoCallButtonClick(){
+      this.submitted_videocall = true;
+      this.$v.test_review.$touch();
+
+      if (this.$v.test_review.$invalid) {
+        return;
+      }
+      this.updateVideoCall();
+      this.submitted_videocall = false;
+    },
+
+    updateVideoCall(){
+      return (
+        api.updateVideoCall(this.test_review, this.test_id)
+          .then(response => {
+            this.isSubmitted = true;
+            Swal.fire("Jadwal dan Tautan Video Call diperbarui!", "Jadwal dan Tautan berhasil disimpan.", "success");
+          })
+          .catch(error => {
+            //pop up
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Terjadi kesalahan!',
+              footer: error.response.data.message
+            })
+          })
+      );
+    },
+
     isEmptyAnswerChecked(array, data){
       let found = array.find(element => element.id == data.id);
       if(found){
@@ -475,6 +545,7 @@ function loading() {
                 </div>
                 <div
                   v-if="isReview"
+                  id="card-review"
                   class="mt-4"
                 >
                   <div>
@@ -482,11 +553,8 @@ function loading() {
                       class="card h-100"
                       style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
                     >
-                      <div
-                        class="card-body"
-                        style="min-width:260px; max-width:600px"
-                      >
-                        <div class="row justify-content-center mr-1 ml-1">
+                      <div class="card-body pb-0 pt-3">
+                        <div class="row justify-content-center mr-1 ml-1 mb-2">
                           <div class="col-sm-3 text-center">
                             <img
                               :src="backendUrl + '/' + (patient.image ? patient.image : 'avatars/default_profile.jpg')"
@@ -504,91 +572,130 @@ function loading() {
                             <p class="font-size-14">
                               {{ patient.city + ', ' + patient.province }}
                             </p>
-                            <hr>
-                            <div class="row ml-1">
-                              <div class="column mt-0 mb-0">
-                                <p class="mt-0 mb-0">
-                                  <b>Tes ke-{{ test_review.index.toString() }}</b>
-                                </p>
-                                <p class="mt-0 mb-0">
-                                  <b>Tanggal tes</b>
-                                </p>
-                                <p class="mt-0 mb-0">
-                                  <b>Total skor</b>
-                                </p>
-                              </div>
-                              <div class="column mr-2 ml-2">
-                                <p
-                                  class="mt-0 mb-0"
-                                  style="visibility: hidden;"
-                                >
-                                  //
-                                </p>
-                                <p class="mt-0 mb-0">
-                                  :
-                                </p>
-                                <p class="mt-0 mb-0">
-                                  :
-                                </p>
-                              </div>
-                              <div class="column mt-0 mb-0">
-                                <p
-                                  class="mt-0 mb-0"
-                                  style="visibility: hidden;"
-                                >
-                                  //
-                                </p>
-                                <p class="mt-0 mb-0">
-                                  {{ dateFormatted(test_review.created_at) }}
-                                </p>
-                                <p class="mt-0 mb-0">
-                                  {{ test_review.score.toString() }} dari {{ test.total_score.toString() }}
-                                </p>
-                              </div>
-                            </div>
                           </div>
+                        </div>
+                        <hr style="margin-top:0; margin-left: -20px!important; margin-right: -20px!important;">
+                        <div
+                          class="row"
+                          style="display: flex; justify-content: center; align-items: center;"
+                        >
+                          <div class="col-md-4">
+                            <b-button
+                              variant="outline-light"
+                              size="sm"
+                              style="width: 100%;"
+                            >
+                              <b>Tes ke-{{ test_review.index.toString() }}</b>
+                            </b-button>
+                          </div>
+                          <div class="col-md-4">
+                            <b-button
+                              variant="outline-light"
+                              size="sm"
+                              style="width: 100%;"
+                            >
+                              <b>{{ dateFormatted(test_review.created_at) }}</b>
+                            </b-button>
+                          </div>
+                          <div class="col-md-4">
+                            <b-button
+                              variant="outline-light"
+                              size="sm"
+                              style="width: 100%;"
+                            >
+                              <b>Skor: {{ test_review.score.toString() }} dari {{ test.total_score.toString() }}</b>
+                            </b-button>
+                          </div>
+                        </div>
+                        <hr style="margin-bottom: 0;margin-left: -20px!important; margin-right: -20px!important;">
+                        <div class="font-size-13 text-center mt-2 mb-2">
+                          <a>Cek riwayat tes</a>
                         </div>
                       </div>
                     </div>
                     <div v-if="!test_review.is_finished">
                       <div
-                        class="card h-100"
+                        class="card h-100 mb-0"
                         style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
                       >
-                        <div
-                          class="card-body"
-                          style="min-width:260px; max-width:600px"
-                        >
+                        <div class="card-body">
                           <div class="text-center">
                             <label>Verifikasi Jawaban via Video Call</label>
                           </div>
-                          <div class="row ml-1">
-                            <div class="column mt-0 mb-0">
-                              <p class="mt-0 mb-0">
-                                <b>Jadwal</b>
-                              </p>
-                              <p class="mt-0 mb-0">
-                                <b>Link/URL</b>
-                              </p>
+                          <div class="row mt-4">
+                            <div class="col-sm-3">
+                              <input
+                                v-model="text.tanggal"
+                                type="text"
+                                class="form-control"
+                                :disabled="true"
+                                style="border: 0"
+                              >
                             </div>
-                            <div class="column mr-2 ml-2">
-                              <p class="mt-0 mb-0">
-                                :
-                              </p>
-                              <p class="mt-0 mb-0">
-                                :
-                              </p>
+                            <div class="col-sm-9 datepicker-div">
+                              <date-picker
+                                v-if="isPsychologist"
+                                v-model="test_review.videocall_date"
+                                :first-day-of-week="1" 
+                                lang="en"
+                                value-type="format"
+                                :disabled="isReview && !isPsychologist"
+                                :class="{ 'is-invalid': submitted_videocall && $v.test_review.videocall_date.$error }"
+                              />
+                              <input
+                                v-if="!isPsychologist"
+                                v-model="test_review.videocall_date"
+                                type="text"
+                                class="form-control"
+                                :disabled="isReview && !isPsychologist"
+                                :style="disabled_bg"
+                              >
+                              <div
+                                v-if="submitted_videocall && !$v.test_review.videocall_date.required"
+                                class="invalid-feedback"
+                              >
+                                Tanggal harus diisi!
+                              </div>
                             </div>
-                            <div class="column mt-0 mb-0">
-                              <p class="mt-0 mb-0">
-                                {{ test_review.videocall_date ? dateFormatted(test_review.videocall_date) : '-' }}
-                              </p>
-                              <p class="mt-0 mb-0">
-                                {{ test_review.videocall_link ? test_review.videocall_link : '-' }}
-                              </p>
+                          </div>
+                          <div class="row mt-4">
+                            <div class="col-sm-3">
+                              <input
+                                v-model="text.link"
+                                type="text"
+                                class="form-control"
+                                :disabled="true"
+                                style="border: 0"
+                              >
+                            </div>
+                            <div class="col-sm-9 datepicker-div">
+                              <input
+                                v-model="test_review.videocall_link"
+                                type="text"
+                                class="form-control"
+                                :disabled="isReview && !isPsychologist"
+                                :style="disabled_bg"
+                                :class="{ 'is-invalid': submitted_videocall && $v.test_review.videocall_link.$error }"
+                              >
+                              <div
+                                v-if="submitted_videocall && !$v.test_review.videocall_link.required"
+                                class="invalid-feedback"
+                              >
+                                Tautan harus diisi!
+                              </div>
                             </div>
                           </div>
                         </div>
+                        <b-button
+                          v-if="isPsychologist"
+                          class="mt-2"
+                          variant="warning"
+                          size="sm"
+                          style="width:100%;"
+                          @click="onUpdateVideoCallButtonClick()" 
+                        >
+                          Perbarui
+                        </b-button>
                       </div>
                     </div>
                   </div>
@@ -858,9 +965,16 @@ function loading() {
     border: 4px solid #ff3d60 !important;
   }
 
+  .datepicker-div >>> input {
+    height:38.64px;
+  }
+
   @media only screen and (min-width: 820px) { 
-  #main-page { 
-    width: 820px; 
-  } 
-}
+    #main-page { 
+      width: 820px; 
+    }
+    #card-review {
+      width: 560px
+    }
+  }
 </style>

@@ -15,3 +15,11 @@ export function inputChatSchedules(data){
         data: data
     })
 }
+
+export function updateVideoCall(data, test_id){
+    return httpAxios({
+        url: `/test/video/${test_id}`,
+        method: 'PUT',
+        data: data
+    })
+}
