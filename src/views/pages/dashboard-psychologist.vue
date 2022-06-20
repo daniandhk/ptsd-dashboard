@@ -64,7 +64,7 @@ export default {
           this.viewProfile = true
           this.viewChatSchedule = false
         }
-        else if(this.user.profile.chat_schedule.length == 0){
+        else if(this.user.profile.chat_schedules.length == 0){
           this.viewEmail = false
           this.viewProfile = false
           this.viewChatSchedule = true

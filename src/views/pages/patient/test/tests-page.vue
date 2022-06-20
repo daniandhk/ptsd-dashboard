@@ -64,11 +64,30 @@ export default {
         link: 'Tautan / Link'
       },
 
+      isRelated: false,
+      isVideoCallStarted: false,
       isPsychologist: false,
+      isNeedConsult: true,
       disabled_bg: {
         backgroundColor: "#F0F4F6",
       },
       submitted_videocall: false,
+      showTimePanel: false,
+
+      input_consult: {
+        is_consult: false,
+        patient_id: "",
+        psychologist_id: "",
+        date: "",
+        notes: [
+          {
+            question_text: ""
+          }
+        ]
+      },
+      submitted_consult: false,
+
+      historyData: [],
     };
   },
   computed: {
@@ -78,6 +97,14 @@ export default {
     currentPageIndex() {
       return this.currentPage-1;
     },
+    isSmallScreen() {
+      return this.$screen.breakpoint == 'xs' || this.$screen.breakpoint == 'sm';
+    },
+  },
+  watch: {
+    $route: async function() {
+      window.location.reload();
+    }
   },
   created() {
     document.body.classList.add("auth-body-bg");
@@ -104,6 +131,10 @@ export default {
     test_review: {
       videocall_date: { required },
       videocall_link: { required },
+    },
+
+    input_consult: {
+      date: { required },
     }
   },
   mounted: async function() {
@@ -121,13 +152,24 @@ export default {
     },
 
     async loadData(){
+      loading();
+      this.isLoading = true
+
       await this.checkAuth();
       await this.setData();
       if(this.isReview){
+        await this.loadHistory();
         await this.getAnswers();
         await this.convertAnswers();
-        await this.setReviewData();
+        if(this.user.role == 'psychologist'){
+          await this.checkRelation();
+          await this.checkVideoCallDate();
+        }
+        await this.checkRole();
       }
+
+      loading();
+      this.isLoading = false
     },
 
     getAge(string){
@@ -138,10 +180,19 @@ export default {
       return moment(string).locale('id').format('DD MMMM YYYY')
     },
 
-    setReviewData(){
+    async checkRole(){
       this.patient = this.test_review.patient;
-        
+
       if(this.user.role == 'patient'){
+        if(this.patient_id != this.user.profile.id){
+          this.$router.replace({
+            name: 'error-404'
+          });
+        }
+
+        this.isPsychologist = false;
+        this.disabled_bg.backgroundColor = "#F0F4F6";
+
         if(this.test_review.videocall_link == null){
           this.test_review.videocall_link = '-'
         }
@@ -149,29 +200,102 @@ export default {
           this.test_review.videocall_date = '-'
         }
         else{
-          this.test_review.videocall_date = this.dateFormatted(this.test_review.videocall_date)
+          this.test_review.videocall_date = moment(this.test_review.videocall_date).locale('id').format('DD MMMM YYYY HH:mm:ss')
+        }
+      }
+      else{
+        this.isPsychologist = true;
+        if(this.isRelated){
+          this.disabled_bg.backgroundColor = "";
+        }
+        else{
+          this.disabled_bg.backgroundColor = "#F0F4F6";
+        }
+        
+        if(this.test_review.videocall_date != null){
+          if(this.isRelated){
+            this.test_review.videocall_date = new Date(this.test_review.videocall_date)
+          }
+          else{
+            this.test_review.videocall_date = moment(this.test_review.videocall_date).locale('id').format('DD MMMM YYYY HH:mm:ss')
+          }
         }
       }
     },
 
-    getRequestParams(test_type) {
+    async checkVideoCallDate(){
+      if(this.test_review.videocall_date){
+        moment()
+          .isSameOrAfter(this.test_review.videocall_date) 
+          ? this.isVideoCallStarted = true : this.isVideoCallStarted = false
+      }
+      else{
+        this.isVideoCallStarted = false;
+      }
+    },
+
+    getRequestParams(test_type, patient_id, psychologist_id) {
       let params = {};
 
       if (test_type) {
         params["test_type"] = test_type;
       }
 
+      if (patient_id) {
+        params["patient_id"] = patient_id;
+      }
+
+      if (psychologist_id) {
+        params["psychologist_id"] = psychologist_id;
+      }
+
       return params;
     },
 
+    async loadHistory(){
+      const params = this.getRequestParams(
+        null, this.patient_id, null
+      );
+      return api.getTests(params)
+        // eslint-disable-next-line no-unused-vars
+        .then(response => {
+          if(response.data.data){
+            this.historyData = response.data.data
+          }
+        })
+        .catch(error => {
+          this.$router.replace({
+            name: 'error-404'
+          });
+        })
+    },
+
+    async checkRelation(){
+      const params = this.getRequestParams(
+        null, this.patient_id, this.user.profile.id
+      );
+      return api.getRelations(params)
+        // eslint-disable-next-line no-unused-vars
+        .then(response => {
+          if(response.data.data){
+            if(response.data.data.length > 0){
+              this.isRelated = true
+            }
+          }
+        })
+        .catch(error => {
+          this.$router.replace({
+            name: 'error-404'
+          });
+        })
+    },
+
     async checkAuth(){
-      loading();
-      this.isLoading = true
       if(this.test_id && this.patient_id){
         this.isReview = true
       }
       const params = this.getRequestParams(
-        this.test_type,
+        this.test_type, null, null
       );
       return api.getTestTypeQuestions(params)
         // eslint-disable-next-line no-unused-vars
@@ -184,12 +308,8 @@ export default {
               name: 'error-404'
             });
           }
-          loading();
-          this.isLoading = false;
         })
         .catch(error => {
-          loading();
-          this.isLoading = false;
 
           this.$router.replace({
             name: 'error-404'
@@ -222,21 +342,6 @@ export default {
     },
 
     getAnswers(){
-      if(this.user.role == 'patient'){
-        if(this.patient_id != this.user.profile.id){
-          this.$router.replace({
-            name: 'error-404'
-          });
-        }
-      }
-      if(this.user.role == 'psychologist'){
-        this.isPsychologist = true;
-        this.disabled_bg.backgroundColor = "";
-      }
-      else{
-        this.isPsychologist = false;
-        this.disabled_bg.backgroundColor = "#F0F4F6";
-      }
       return api.showTest(this.test_id)
         // eslint-disable-next-line no-unused-vars
         .then(response => {
@@ -388,25 +493,46 @@ export default {
       );
     },
 
-    onUpdateVideoCallButtonClick(){
+    async onUpdateVideoCallButtonClick(){
       this.submitted_videocall = true;
       this.$v.test_review.$touch();
 
       if (this.$v.test_review.$invalid) {
         return;
       }
-      this.updateVideoCall();
+      if (!this.isUrlValid(this.test_review.videocall_link)){
+        return;
+      }
+      this.test_review.videocall_date = moment(this.test_review.videocall_date).format('YYYY-MM-DD HH:mm:ss')
+      await this.updateVideoCall();
+      await this.checkVideoCallDate();
       this.submitted_videocall = false;
     },
 
-    updateVideoCall(){
+    isUrlValid(string){
+      let url;
+      
+      try {
+        url = new URL(string);
+      } catch (_) {
+        return false;  
+      }
+
+      return url.protocol === "http:" || url.protocol === "https:";
+    },
+
+    async updateVideoCall(){
+      loading();
       return (
         api.updateVideoCall(this.test_review, this.test_id)
           .then(response => {
             this.isSubmitted = true;
             Swal.fire("Jadwal dan Tautan Video Call diperbarui!", "Jadwal dan Tautan berhasil disimpan.", "success");
+            this.test_review.videocall_date = new Date(this.test_review.videocall_date);
+            loading();
           })
           .catch(error => {
+            loading();
             //pop up
             Swal.fire({
               icon: 'error',
@@ -466,6 +592,114 @@ export default {
       if(idx != -1){
         array[idx].text = data.text
       }
+    },
+
+    toggleTimePanel() {
+      this.showTimePanel = !this.showTimePanel;
+    },
+
+    handleOpenChange() {
+      this.showTimePanel = false;
+    },
+
+    onSelectedConsult(e){
+      //e.target.value
+
+    },
+
+    disabledBeforeToday(date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return date < today;
+    },
+
+    addNote(){
+      let data = {
+        question_text: "",
+      }
+      this.input_consult.notes.push(data)
+    },
+
+    onNoteDeleteClick(index){
+      this.input_consult.notes.splice(index, 1);
+    },
+
+    onSaveConsultButtonClick(){
+      if(this.isNeedConsult){
+        this.submitted_consult = true;
+        this.$v.input_consult.$touch();
+        if (this.$v.input_consult.$invalid) {
+          document.getElementById('card_scoring').scrollIntoView();
+          return;
+        }
+        this.input_consult.is_consult = true;
+        this.input_consult.patient_id = this.patient_id;
+        this.input_consult.psychologist_id = this.user.profile.id;
+      }
+      else{
+        this.input_consult.is_consult = false;
+      }
+      Swal.fire({
+        title: "Akhiri video call?",
+        text: "Penilaian tes akan berakhir dan data akan disimpan.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#005C9A",
+        cancelButtonColor: "#f46a6a",
+        confirmButtonText: "Ya, akhiri video call!"
+      }).then(result => {
+        if (result.value) {
+          this.inputConsult();
+        }
+      });
+    },
+
+    async inputConsult(){
+      loading();
+      return (
+        api.finishTest(this.input_consult, this.test_id)
+          .then(response => {
+            Swal.fire({
+              title: "Verifikasi jawaban telah berakhir!",
+              text: "Data berhasil disimpan.",
+              icon: "success",
+              showCancelButton: false,
+              confirmButtonColor: "#005C9A",
+              confirmButtonText: "Ok"
+            }).then(result => {
+              if (result.value) {
+                window.location.reload();
+              }
+            });
+            loading();
+          })
+          .catch(error => {
+            loading();
+            //pop up
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Terjadi kesalahan!',
+              footer: error.response.data.message
+            })
+          })
+      );
+    },
+
+    showHistory(){
+      this.$bvModal.show('modal-history');
+    },
+
+    goToTest(test_id){
+      this.$router.push({
+        name: 'test-review', 
+        params: { 
+          test_type: this.test_type,
+          test_id: test_id,
+          patient_id: this.patient_id
+        }
+      });
     },
 
     //
@@ -609,18 +843,23 @@ function loading() {
                         </div>
                         <hr style="margin-bottom: 0;margin-left: -20px!important; margin-right: -20px!important;">
                         <div class="font-size-13 text-center mt-2 mb-2">
-                          <a>Cek riwayat tes</a>
+                          <a
+                            href="javascript:void(0);"
+                            style="color:#505d69;"
+                            @click="showHistory()"
+                          >Cek riwayat tes</a>
                         </div>
                       </div>
                     </div>
                     <div v-if="!test_review.is_finished">
                       <div
-                        class="card h-100 mb-0"
+                        class="card h-100"
                         style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
                       >
                         <div class="card-body">
                           <div class="text-center">
-                            <label>Verifikasi Jawaban via Video Call</label>
+                            <label class="mb-0">Verifikasi Jawaban via Video Call</label>
+                            <hr style="margin-bottom: 0;margin-left: -20px!important; margin-right: -20px!important;">
                           </div>
                           <div class="row mt-4">
                             <div class="col-sm-3">
@@ -634,27 +873,39 @@ function loading() {
                             </div>
                             <div class="col-sm-9 datepicker-div">
                               <date-picker
-                                v-if="isPsychologist"
+                                v-if="isPsychologist && isRelated"
                                 v-model="test_review.videocall_date"
                                 :first-day-of-week="1" 
                                 lang="en"
-                                value-type="format"
-                                :disabled="isReview && !isPsychologist"
+                                type="datetime"
+                                :clearable="false"
+                                :show-time-panel="showTimePanel"
+                                :disabled="isReview && (!isPsychologist || !isRelated)"
+                                :disabled-date="disabledBeforeToday"
                                 :class="{ 'is-invalid': submitted_videocall && $v.test_review.videocall_date.$error }"
-                              />
+                              >
+                                <template v-slot:footer>
+                                  <button
+                                    class="mx-btn mx-btn-text"
+                                    @click="toggleTimePanel"
+                                  >
+                                    {{ showTimePanel ? 'pilih tanggal' : 'pilih jam' }}
+                                  </button>
+                                </template>
+                              </date-picker>
                               <input
-                                v-if="!isPsychologist"
+                                v-if="!isPsychologist || !isRelated"
                                 v-model="test_review.videocall_date"
                                 type="text"
                                 class="form-control"
-                                :disabled="isReview && !isPsychologist"
+                                :disabled="isReview && (!isPsychologist || !isRelated)"
                                 :style="disabled_bg"
                               >
                               <div
                                 v-if="submitted_videocall && !$v.test_review.videocall_date.required"
                                 class="invalid-feedback"
                               >
-                                Tanggal harus diisi!
+                                Jadwal harus diisi!
                               </div>
                             </div>
                           </div>
@@ -673,21 +924,31 @@ function loading() {
                                 v-model="test_review.videocall_link"
                                 type="text"
                                 class="form-control"
-                                :disabled="isReview && !isPsychologist"
+                                :disabled="isReview && (!isPsychologist || !isRelated)"
                                 :style="disabled_bg"
-                                :class="{ 'is-invalid': submitted_videocall && $v.test_review.videocall_link.$error }"
+                                :class="{ 'is-invalid': submitted_videocall && ($v.test_review.videocall_link.$error || !isUrlValid(test_review.videocall_link)) }"
                               >
+                              <span
+                                v-if="isPsychologist && isRelated"
+                                class="text-muted font-size-13"
+                              >Google Meet, Zoom, atau sejenisnya</span>
                               <div
                                 v-if="submitted_videocall && !$v.test_review.videocall_link.required"
                                 class="invalid-feedback"
                               >
                                 Tautan harus diisi!
                               </div>
+                              <div
+                                v-if="submitted_videocall && !isUrlValid(test_review.videocall_link)"
+                                class="invalid-feedback"
+                              >
+                                Format URL harus benar! (diawali http atau https)
+                              </div>
                             </div>
                           </div>
                         </div>
                         <b-button
-                          v-if="isPsychologist"
+                          v-if="isPsychologist && isRelated"
                           class="mt-2"
                           variant="warning"
                           size="sm"
@@ -695,6 +956,163 @@ function loading() {
                           @click="onUpdateVideoCallButtonClick()" 
                         >
                           Perbarui
+                        </b-button>
+                      </div>
+                      <div
+                        v-if="isPsychologist && isRelated"
+                        id="card_scoring"
+                        class="card h-100"
+                        style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);"
+                      >
+                        <div class="card-body">
+                          <div class="text-center mb-4">
+                            <label class="mb-0">Penilaian Tes</label>
+                            <hr style="margin-bottom: 0;margin-left: -20px!important; margin-right: -20px!important;">
+                          </div>
+                          <div
+                            v-if="!isVideoCallStarted"
+                            class="text-center"
+                          >
+                            Penilaian tes dapat dilakukan saat jadwal Verifikasi Jawaban via Video Call sudah dimulai!
+                          </div>
+                          <div v-if="isVideoCallStarted">
+                            <div>Periksalah keadaan / kondisi pasien dan verifikasi setiap jawaban pasien selama video call berlangsung.</div>
+                            <div class="mt-3">
+                              <div><label>1. Apakah pasien perlu konsultasi video call lagi?</label></div>
+                              <div>
+                                <input
+                                  v-model="isNeedConsult"
+                                  type="radio"
+                                  :value="true"
+                                  style="vertical-align: middle; float: left; margin-top:4.8px;"
+                                  @change="onSelectedConsult"
+                                >
+                                <div style="margin-left: 25px;">
+                                  Ya
+                                </div>
+                                <input
+                                  v-model="isNeedConsult"
+                                  type="radio"
+                                  :value="false"
+                                  style="vertical-align: middle; float: left; margin-top:4.8px;"
+                                  @change="onSelectedConsult"
+                                >
+                                <div style="margin-left: 25px;">
+                                  Tidak
+                                </div>
+                              </div>
+                            </div>
+                            <div v-if="isNeedConsult">
+                              <div class="mt-3">
+                                <div><label>2. Isi jadwal konsultasi selanjutnya</label></div>
+                                <div class="datepicker-div">
+                                  <date-picker
+                                    v-model="input_consult.date"
+                                    :first-day-of-week="1" 
+                                    lang="en"
+                                    type="datetime"
+                                    :clearable="false"
+                                    :show-time-panel="showTimePanel"
+                                    :disabled="isReview && (!isPsychologist || !isRelated)"
+                                    :disabled-date="disabledBeforeToday"
+                                    :class="{ 'is-invalid': submitted_consult && $v.input_consult.date.$error }"
+                                  >
+                                    <template v-slot:footer>
+                                      <button
+                                        class="mx-btn mx-btn-text"
+                                        @click="toggleTimePanel"
+                                      >
+                                        {{ showTimePanel ? 'pilih tanggal' : 'pilih waktu' }}
+                                      </button>
+                                    </template>
+                                  </date-picker>
+                                  <div
+                                    v-if="submitted_consult && !$v.input_consult.date.required"
+                                    class="invalid-feedback"
+                                  >
+                                    Jadwal harus diisi!
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="mt-3">
+                                Selama jeda dengan konsultasi selanjutnya, psikolog dapat memberikan <b>catatan psikolog</b> (seperti 'Tidur 8 jam sehari' atau 'Minum obat 2x sehari') yang dapat dicek pasien setiap harinya selama jeda berlangsung.
+                                <br><label class="mt-3">3. Isi catatan psikolog (opsional)</label>
+                                <div
+                                  class="form-horizontal"
+                                  style="min-width:260px;"
+                                >
+                                  <hr
+                                    v-if="!isSmallScreen"
+                                    class="mt-2 mb-1"
+                                    style="margin-left: -20px;margin-right: -20px;"
+                                  >
+                                  <div
+                                    v-if="!isSmallScreen"
+                                    class="row text-center"
+                                  >
+                                    <div class="col-lg-9 col-md-9">
+                                      <label class="mb-0">Catatan Psikolog</label>
+                                    </div>
+                                    <div class="col-lg-3 col-md-3">
+                                      <label class="mb-0">Aksi</label>
+                                    </div>
+                                  </div>
+                                  <hr
+                                    class="mt-1"
+                                    style="margin-left: -20px;margin-right: -20px;"
+                                  >
+                                  <div
+                                    v-for="(note, index) of input_consult.notes"
+                                    :key="index"
+                                  >
+                                    <div class="row">
+                                      <div class="col-lg-9 col-md-9 p-1">
+                                        <input
+                                          v-model="note.question_text"
+                                          type="text"
+                                          class="form-control"
+                                          style="min-width: 150px;"
+                                        >
+                                      </div>
+                                      <div class="col-lg-3 col-md-3 p-1">
+                                        <b-button 
+                                          style="width: 100%; text-align: center; vertical-align: middle;"
+                                          variant="danger"
+                                          @click="onNoteDeleteClick(index)"
+                                        >
+                                          <i class="mdi mdi-trash-can" />
+                                        </b-button>
+                                      </div>
+                                    </div>
+                                    <hr
+                                      class="mt-3"
+                                      style="margin-left: -20px;margin-right: -20px;"
+                                    >
+                                  </div>
+                                  <div class="text-center">
+                                    <b-button 
+                                      style="width: 40%; text-align: center; vertical-align: middle;"
+                                      variant="outline-secondary"
+                                      size="sm"
+                                      @click="addNote()"
+                                    >
+                                      <b-icon icon="plus-circle-fill" /> tambah catatan
+                                    </b-button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <b-button
+                          v-if="isVideoCallStarted"
+                          class="mt-2"
+                          variant="success"
+                          size="md"
+                          style="width:100%;"
+                          @click="onSaveConsultButtonClick()" 
+                        >
+                          Simpan & Akhiri Video Call
                         </b-button>
                       </div>
                     </div>
@@ -786,7 +1204,7 @@ function loading() {
                       type="radio"
                       name="a"
                       value="a"
-                      style="vertical-align: middle; float: left; margin-top:5px; visibility: hidden;"
+                      style="vertical-align: middle; float: left; margin-top:4.8px; visibility: hidden;"
                     >
                     <div style="width:100%; margin-left: 12px;">
                       <textarea 
@@ -814,7 +1232,7 @@ function loading() {
                     type="radio"
                     :name="'radio-' + index + '-' + index_answer"
                     :value="isReview ? answer.id : answer"
-                    style="vertical-align: middle; float: left; margin-top:5px;"
+                    style="vertical-align: middle; float: left; margin-top:4.8px;"
                     :disabled="isReview"
                   >
                   <div
@@ -833,7 +1251,7 @@ function loading() {
                       type="radio"
                       name="a"
                       value="a"
-                      style="vertical-align: middle; float: left; margin-top:5px; visibility: hidden;"
+                      style="vertical-align: middle; float: left; margin-top:4.8px; visibility: hidden;"
                     >
                     <div style="width:100%; margin-left: 12px;">
                       <textarea 
@@ -861,7 +1279,7 @@ function loading() {
                     type="radio"
                     :name="'radio-' + index + '-' + index_answer"
                     :value="isReview ? answer.id : answer"
-                    style="vertical-align: middle; float: left; margin-top:5px;"
+                    style="vertical-align: middle; float: left; margin-top:4.8px;"
                     :disabled="isReview"
                   >
                   <div
@@ -956,6 +1374,41 @@ function loading() {
           </div>
         </div>
       </div>
+    </div>
+
+    <div name="modalHistory">
+      <b-modal 
+        id="modal-history" 
+        size="md" 
+        title="Riwayat Tes Pasien" 
+        hide-footer 
+        title-class="font-18"
+      >
+        <template v-slot:title>
+          <a class="font-weight-bold active">Riwayat tes {{ test.name }}</a>
+        </template>
+        <template>
+          <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <label>{{ test.name }}</label>
+            <div
+              v-for="(data, index) of historyData"
+              :key="index"
+            >
+              <div class="mt-2">
+                <b-button
+                  variant="outline-dark"
+                  size="sm"
+                  style="width: 100%;"
+                  :disabled="test_id == data.id"
+                  @click="goToTest(data.id)"
+                >
+                  <b>Tes ke-{{ data.index }}, {{ dateFormatted(data.created_at) }}</b>
+                </b-button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </b-modal>
     </div>
   </div>
 </template>

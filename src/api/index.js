@@ -73,3 +73,11 @@ export function getTestTypes(params){
 export function getTestTypeQuestions(params){
     return httpAxios.get(`/testtype/questions`, { params });
 }
+
+export function getRelations(params){
+    return httpAxios.get(`/relation`, { params });
+}
+
+export function getTests(params){
+    return httpAxios.get(`/test`, { params });
+}

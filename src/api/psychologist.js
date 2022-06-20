@@ -23,3 +23,11 @@ export function updateVideoCall(data, test_id){
         data: data
     })
 }
+
+export function finishTest(data, test_id){
+    return httpAxios({
+        url: `/test/finish/${test_id}`,
+        method: 'PUT',
+        data: data
+    })
+}

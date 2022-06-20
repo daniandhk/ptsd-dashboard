@@ -34,11 +34,11 @@ export default {
       return this.$store ? this.$store.state.notification : null;
     },
   },
-  mounted: async function(){
-    this.isLoading = true;
-    await this.getDashboard();
-    this.isLoading = false;
-  },
+  // mounted: async function(){
+  //   this.isLoading = true;
+  //   await this.getDashboard();
+  //   this.isLoading = false;
+  // },
   methods: {
     ...notificationMethods,
 
@@ -63,26 +63,26 @@ export default {
     setDashboard(){
         if(this.dashboard){
             this.dashboard.test_types.forEach((element, index, array) => {
-                if(element.current_test == null){
+                if(element.tests.length == 0){
                     this.isTestSubmitted[index] = false;
                     this.isTestNull[index] = true;
                 }
                 else{
                     this.isTestNull[index] = false;
-                    if(element.current_test.is_finished){
+                    if(element.tests[0].is_finished){
                         this.isTestFinished[index] = true;
                     }
                     else{
                         this.isTestFinished[index] = false;
                     }
-                    if(element.current_test.videocall_date && element.current_test.videocall_link){
+                    if(element.tests[0].videocall_date && element.tests[0].videocall_link){
                         this.isScheduleNull[index] = false;
                     }
                     else{
                         this.isScheduleNull[index] = true;
                     }
 
-                    let next_date = element.current_test.next_date
+                    let next_date = element.tests[0].next_date
                     if(moment().format('L') < moment(next_date).format('L')){
                         this.isTestSubmitted[index] = true;
                     }
@@ -90,9 +90,9 @@ export default {
                         this.isTestSubmitted[index] = false;
                     }
 
-                    if(element.current_test.videocall_date){
-                      moment(this.formatDate(moment(), 'tanggal'))
-                        .isSameOrAfter(this.formatDate(element.current_test.videocall_date, 'tanggal')) 
+                    if(element.tests[0].videocall_date){
+                      moment()
+                        .isSameOrAfter(element.tests[0].videocall_date) 
                         ? this.isScheduleToday[index] = true : this.isScheduleToday[index] = false
                     }
                     else{
@@ -110,7 +110,7 @@ export default {
     },
 
     onAnswerButtonClick(test_type){
-        let id = test_type.current_test.id
+        let id = test_type.tests[0].id
         this.$router.push({
           name: 'test-review', 
           params: { 
@@ -118,7 +118,7 @@ export default {
             test_id: id,
             patient_id: this.user.profile.id
           }
-      });
+        });
     },
 
     onTestButtonClick(test_type){
@@ -129,12 +129,7 @@ export default {
     },
 
     onGoToLinkButtonClick(link){
-      if(link == 'chat'){
-        window.open("http://help-ptsd-chat.herokuapp.com/");
-      }
-      else{
-        window.open(link);
-      }
+      window.open(link);
     },
 
     formatDate(date, format){
@@ -280,7 +275,7 @@ function loading() {
                                     class="font-size-16"
                                     style="font-weight:bold;"
                                   >
-                                    {{ formatDate(test_type.current_test.videocall_date, 'lengkap') }}
+                                    {{ formatDate(test_type.tests[0].videocall_date, 'lengkap') }}
                                   </div>
                                 </div>
                                 <div class="col-lg-6 p-2">
@@ -293,7 +288,7 @@ function loading() {
                                       class="btn btn-primary m-1 btn-sm mr-2"
                                       style="background-color:#005C9A; min-width:80%;"
                                       :disabled="!isScheduleToday[index]"
-                                      @click.stop.prevent="onGoToLinkButtonClick(test_type.current_test.videocall_link)"
+                                      @click.stop.prevent="onGoToLinkButtonClick(test_type.tests[0].videocall_link)"
                                     >
                                       Video Call
                                     </button>
@@ -354,9 +349,9 @@ function loading() {
                         Tes berikutnya
                         <div
                           class="mt-2"
-                          style="text-weight:bold;"
+                          style="color:black; text-weight:bold;"
                         >
-                          {{ formatDate(test_type.current_test.next_date, 'tanggal') }}
+                          {{ formatDate(test_type.tests[0].next_date, 'tanggal') }}
                         </div>
                       </div>
                     </div>
@@ -398,7 +393,7 @@ function loading() {
                                     class="col-md-6"
                                     style="font-weight:bold;"
                                   >
-                                    {{ formatDate(test_type.current_test.created_at, 'tanggal') }}
+                                    {{ formatDate(test_type.tests[0].created_at, 'tanggal') }}
                                   </div>
                                   <div class="col-md-6">
                                     <button 
@@ -483,7 +478,7 @@ function loading() {
                                   <vue-gauge
                                     :refid="'type-unique-id'"
                                     :options="{
-                                      'needleValue':test_type.current_test.score,
+                                      'needleValue':test_type.tests[0].score,
                                       'arcDelimiters':[30,75], 
                                       'rangeLabel':['0',test_type.total_score.toString()], 
                                       'hasNeedle':true,
@@ -494,7 +489,7 @@ function loading() {
                                   <div
                                     style="font-size:16px; text-align:center; font-weight: bold;"
                                   >
-                                    Skor: {{ test_type.current_test.score }} dari {{ test_type.total_score }}
+                                    Skor: {{ test_type.tests[0].score }} dari {{ test_type.total_score }}
                                   </div>
                                 </div>
                               </div>

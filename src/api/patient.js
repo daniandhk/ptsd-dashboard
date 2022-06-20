@@ -50,7 +50,7 @@ export function inputJournal(data){
 export function updateJournal(data, user_id){
     return httpAxios({
         url: `/journal/update/${user_id}`,
-        method: 'POST',
+        method: 'PUT',
         data: data
     })
 }

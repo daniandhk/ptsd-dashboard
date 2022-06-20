@@ -63,11 +63,11 @@ export default {
       this.date = moment().locale('id')
     }, 1000)
   },
-  mounted: async function(){
-    this.isLoading = true;
-    await this.getDashboard();
-    this.isLoading = false;
-  },
+  // mounted: async function(){
+  //   this.isLoading = true;
+  //   await this.getDashboard();
+  //   this.isLoading = false;
+  // },
   methods: {
     ...notificationMethods,
 
@@ -124,9 +124,7 @@ export default {
 
             if(this.dashboard.consult){
               this.haveConsult = true;
-              let today = this.formatDate(this.date, 'tanggal')
-              let hari = this.formatDate(this.dashboard.consult.next_date, 'tanggal')
-              if(moment(today).isSameOrAfter(hari)){
+              if(moment().isSameOrAfter(this.dashboard.consult.next_date)){
                 this.isConsultToday = true;
               }
               else{
@@ -370,7 +368,10 @@ function loading() {
                         style="display: flex; justify-content: center;"
                       >
                         <div style="width:50%;">
-                          <div class="mb-2">
+                          <div
+                            class="mb-2"
+                            style="color:#005C9A; font-weight: bolder;"
+                          >
                             Konsultasi ke-{{ dashboard.consult.consult_index }}
                           </div>
                           <div style="font-weight:bold;">
@@ -378,7 +379,7 @@ function loading() {
                           </div>
                         </div>
                         <div style="width:50%;">
-                          <div>
+                          <div style="color:#005C9A; font-weight: bolder;">
                             Tautan / Link
                           </div>
                           <div>
@@ -401,7 +402,10 @@ function loading() {
                         style="display: flex; justify-content: center;"
                       >
                         <div style="width:50%;">
-                          <div class="mb-2">
+                          <div
+                            class="mb-2"
+                            style="color:#005C9A; font-weight: bolder;"
+                          >
                             Konsultasi terakhir
                           </div>
                           <div>
@@ -409,7 +413,10 @@ function loading() {
                           </div>
                         </div>
                         <div style="width:50%;">
-                          <div class="mb-2">
+                          <div
+                            class="mb-2"
+                            style="color:#005C9A; font-weight: bolder;"
+                          >
                             Konsultasi ke-{{ dashboard.consult.consult_index }}
                           </div>
                           <div style="font-weight:bold;">
@@ -488,6 +495,26 @@ function loading() {
                                 <p class="text-muted">
                                   <i class="mdi mdi-account mr-1" /> {{ dashboard.psychologist.speciality }}
                                 </p>
+                                <!-- <div v-if="!isOnline(dashboard.psychologist)">
+                                  <div class="text-center mb-1">
+                                    <div
+                                      class="font-size-12"
+                                      style="color:gray; font-weight:bold;"
+                                    >
+                                      • Offline
+                                    </div>
+                                  </div>
+                                </div>
+                                <div v-if="isOnline(dashboard.psychologist)">
+                                  <div class="text-center mb-1">
+                                    <div
+                                      class="font-size-12"
+                                      style="color:#1cbb8c; font-weight:bold;"
+                                    >
+                                      • Online
+                                    </div>
+                                  </div>
+                                </div> -->
                                 <div>
                                   <button 
                                     type="button"
@@ -525,7 +552,7 @@ function loading() {
                         class="font-size-12"
                         style="color:grey;"
                       >
-                        Butuh Video Call? Silahkan kirim pesan ke psikolog!
+                        Butuh konsultasi video call? Silahkan kirim pesan ke psikolog!
                       </div>
                     </div>
                   </div>

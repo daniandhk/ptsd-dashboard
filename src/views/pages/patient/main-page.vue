@@ -39,7 +39,8 @@ export default {
         default:
           this.$refs.Test.refreshData();
           this.$refs.Consult.refreshData();
-          return this.$refs.Journal.refreshData();
+          this.$refs.Journal.refreshData();
+          break
       }
     },
   },

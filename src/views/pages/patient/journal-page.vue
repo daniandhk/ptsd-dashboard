@@ -64,11 +64,11 @@ export default {
   beforeMount: async function(){
     document.body.setAttribute("data-topbar", "dark");
   },
-  mounted: async function(){
-    this.isLoading = true;
-    await this.getDashboard(this.today);
-    this.isLoading = false;
-  },
+  // mounted: async function(){
+  //   this.isLoading = true;
+  //   await this.getDashboard(this.today);
+  //   this.isLoading = false;
+  // },
   methods: {
     ...notificationMethods,
 
@@ -253,10 +253,6 @@ export default {
     onDateButtonClick(){
       this.getDashboard(this.date);
     },
-
-    formattedDate(date){
-        return moment(date).locale('id').format('LL');
-    }
   },
 };
 
